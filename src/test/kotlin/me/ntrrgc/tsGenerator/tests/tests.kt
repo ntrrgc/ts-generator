@@ -305,4 +305,19 @@ interface Widget {
             }
         ))
     }
+
+    it("supports filtering properties") {
+        assertGeneratedCode(SimpleTypes::class, setOf("""
+    interface SimpleTypes {
+        aString: string;
+        aDouble: number;
+    }
+    """), classTransformers = listOf(
+            object : ClassTransformer {
+                override fun transformPropertyList(properties: List<KProperty<*>>, klass: KClass<*>): List<KProperty<*>> {
+                    return properties.filter { it.name != "anInt" }
+                }
+            }
+        ))
+    }
 })
