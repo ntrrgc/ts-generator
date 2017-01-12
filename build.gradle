@@ -1,0 +1,43 @@
+group 'me.ntrrgc'
+version '1.0.0'
+
+buildscript {
+    ext.kotlin_version = '1.1-M04'
+
+    repositories {
+        maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.1' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.0-M3'
+    }
+}
+
+apply plugin: 'org.junit.platform.gradle.plugin'
+
+junitPlatform {
+    filters {
+        engines {
+            include 'spek'
+        }
+    }
+}
+
+apply plugin: 'kotlin'
+
+repositories {
+    maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.1' }
+    maven { url "https://dl.bintray.com/jetbrains/spek" }
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+
+    testCompile 'com.winterbe:expekt:0.5.0'
+    testCompile 'org.jetbrains.spek:spek-api:1.1.0-beta3'
+    testRuntime 'org.junit.platform:junit-platform-launcher:1.0.0-M3'
+    testRuntime 'org.jetbrains.spek:spek-junit-platform-engine:1.1.0-beta3'
+}
