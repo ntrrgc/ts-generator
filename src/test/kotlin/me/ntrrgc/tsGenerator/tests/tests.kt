@@ -3,6 +3,7 @@ package me.ntrrgc.tsGenerator.tests
 import com.winterbe.expekt.should
 import me.ntrrgc.tsGenerator.ClassTransformer
 import me.ntrrgc.tsGenerator.TypeScriptGenerator
+import me.ntrrgc.tsGenerator.onlyOnSubclassesOf
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
 import kotlin.reflect.KClass
@@ -263,6 +264,25 @@ interface ClassWithDependencies {
                     return propertyName.toUpperCase()
                 }
             }
+        ))
+    }
+
+    it("supports transforming only some classes") {
+        assertGeneratedCode(ClassWithDependencies::class, setOf("""
+interface ClassWithDependencies {
+    widget: Widget;
+}
+""", """
+interface Widget {
+    NAME: string;
+    VALUE: int;
+}
+"""), classTransformers = listOf(
+            object : ClassTransformer {
+                override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
+                    return propertyName.toUpperCase()
+                }
+            }.onlyOnSubclassesOf(Widget::class)
         ))
     }
 })

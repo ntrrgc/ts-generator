@@ -17,7 +17,7 @@ class FilteredClassTransformer(val wrappedTransformer: ClassTransformer,
 
     override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
         if (filter(klass)) {
-            return super.transformPropertyName(propertyName, property, klass)
+            return wrappedTransformer.transformPropertyName(propertyName, property, klass)
         } else {
             return propertyName
         }
@@ -25,7 +25,7 @@ class FilteredClassTransformer(val wrappedTransformer: ClassTransformer,
 
     override fun transformPropertyType(type: KType, property: KProperty<*>, klass: KClass<*>): KType {
         if (filter(klass)) {
-            return super.transformPropertyType(type, property, klass)
+            return wrappedTransformer.transformPropertyType(type, property, klass)
         } else {
             return type
         }
