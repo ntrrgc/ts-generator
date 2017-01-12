@@ -70,10 +70,8 @@ class TypeScriptGenerator(
     }
 
     private fun formatClassType(type: KClass<*>): String {
-        return mappings[type] ?: {
-            visitClass(type)
-            type.simpleName!!
-        }()
+        visitClass(type)
+        return type.simpleName!!
     }
 
     private fun formatKType(kType: KType): TypeScriptType {
