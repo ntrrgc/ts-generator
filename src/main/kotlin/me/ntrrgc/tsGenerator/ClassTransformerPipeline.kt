@@ -2,6 +2,7 @@ package me.ntrrgc.tsGenerator
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import kotlin.reflect.KType
 
 /**
  * Class transformer pipeline.
@@ -27,9 +28,11 @@ internal class ClassTransformerPipeline(val memberTransformers: List<ClassTransf
         return ret
     }
 
-    override fun overridePropertyType(property: KProperty<*>, klass: KClass<*>): String? {
-        return memberTransformers.firstNotNull { transformer ->
-            transformer.overridePropertyType(property, klass)
+    override fun transformPropertyType(type: KType, property: KProperty<*>, klass: KClass<*>): KType {
+        var ret = type
+        memberTransformers.forEach { transformer ->
+            ret = transformer.transformPropertyType(ret, property, klass)
         }
+        return ret
     }
 }

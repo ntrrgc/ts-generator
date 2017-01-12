@@ -42,10 +42,7 @@ import kotlin.reflect.jvm.javaType
  *
  * @param classTransformers Special transformers for certain subclasses.
  * They allow to filter out some classes, customize what methods are
- * exported and how they names are generated. If several transformers
- *
- * @param defaultTransformer Optional transformer applied to each class
- * when a more specific transformer is not found.
+ * exported, how they names are generated and what types are generated.
  */
 class TypeScriptGenerator(
     rootClasses: Iterable<KClass<*>>,
@@ -169,7 +166,7 @@ class TypeScriptGenerator(
             ""
         }
 
-        val transformerPipeline = ClassTransformerPipeline(
+        val pipeline = ClassTransformerPipeline(
             classTransformers
                 .toSortedMap(KClassComparator())
                 .filter { klass.isSubclassOf(it.key) }
@@ -183,14 +180,14 @@ class TypeScriptGenerator(
                 .filter { !isFunctionType(it.returnType.javaType) }
                 .filter { it.visibility == KVisibility.PUBLIC }
                 .let { propertyList ->
-                    transformerPipeline.transformPropertyList(propertyList, klass)
+                    pipeline.transformPropertyList(propertyList, klass)
                 }
                 .map { property ->
-                    val propertyName = transformerPipeline.transformPropertyName(property.name, property, klass)
-                    val propertyType = transformerPipeline.overridePropertyType(property, klass)
-                        ?: formatKType(property.returnType).formatWithoutParenthesis()
+                    val propertyName = pipeline.transformPropertyName(property.name, property, klass)
+                    val propertyType = pipeline.transformPropertyType(property.returnType, property, klass)
 
-                    "    $propertyName: $propertyType;\n"
+                    val formattedPropertyType = formatKType(propertyType).formatWithoutParenthesis()
+                    "    $propertyName: $formattedPropertyType;\n"
                 }
                 .joinToString("") +
             "}"

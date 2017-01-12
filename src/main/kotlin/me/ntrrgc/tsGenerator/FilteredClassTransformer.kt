@@ -2,6 +2,7 @@ package me.ntrrgc.tsGenerator
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import kotlin.reflect.KType
 
 class FilteredClassTransformer(val wrappedTransformer: ClassTransformer,
                                val filter: (klass: KClass<*>) -> Boolean): ClassTransformer {
@@ -22,11 +23,11 @@ class FilteredClassTransformer(val wrappedTransformer: ClassTransformer,
         }
     }
 
-    override fun overridePropertyType(property: KProperty<*>, klass: KClass<*>): String? {
+    override fun transformPropertyType(type: KType, property: KProperty<*>, klass: KClass<*>): KType {
         if (filter(klass)) {
-            return super.overridePropertyType(property, klass)
+            return super.transformPropertyType(type, property, klass)
         } else {
-            return null
+            return type
         }
     }
 }

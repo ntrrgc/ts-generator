@@ -2,6 +2,7 @@ package me.ntrrgc.tsGenerator
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import kotlin.reflect.KType
 
 /**
  * A TypeScript generator class transformer.
@@ -44,19 +45,15 @@ interface ClassTransformer {
     }
 
     /**
-     * Returns the property type that will be included in the
-     * definition.
+     * Returns the property type that will be processed and included
+     * in the definition.
      *
-     * If it returns null, the value of the next class transformer
-     * in the pipeline is used.
-     *
-     * If the pipeline ends without the property type being
-     * transformed it is handled automatically by TypeScriptGenerator.
-     * Classes are visited (so that a definition for the type is
-     * created) and its class name is used, with template parameters
-     * if necessary.
+     * @param type Type coming from previous stages of the pipeline,
+     * by default the actual type of the property.
+     * @param property The actual property of the class.
+     * @param klass Class the property comes from.
      */
-    fun overridePropertyType(property: KProperty<*>, klass: KClass<*>): String? {
-        return null
+    fun transformPropertyType(type: KType, property: KProperty<*>, klass: KClass<*>): KType {
+        return type
     }
 }
