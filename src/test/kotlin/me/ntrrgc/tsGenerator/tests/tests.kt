@@ -8,6 +8,8 @@ import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import kotlin.reflect.KType
+import kotlin.reflect.createType
 
 fun assertGeneratedCode(klass: KClass<*>,
                         expectedOutput: Set<String>,
@@ -283,6 +285,24 @@ interface Widget {
                     return propertyName.toUpperCase()
                 }
             }.onlyOnSubclassesOf(Widget::class)
+        ))
+    }
+
+    it("supports transforming types") {
+        assertGeneratedCode(DataClass::class, setOf("""
+    interface DataClass {
+        prop: int | null;
+    }
+    """), classTransformers = listOf(
+            object : ClassTransformer {
+                override fun transformPropertyType(type: KType, property: KProperty<*>, klass: KClass<*>): KType {
+                    if (klass == DataClass::class && property.name == "prop") {
+                        return Int::class.createType(nullable = true)
+                    } else {
+                        return type
+                    }
+                }
+            }
         ))
     }
 })
