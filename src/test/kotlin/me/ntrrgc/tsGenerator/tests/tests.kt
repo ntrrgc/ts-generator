@@ -11,10 +11,9 @@ import kotlin.reflect.KProperty
 fun assertGeneratedCode(klass: KClass<*>,
                         expectedOutput: Set<String>,
                         mappings: Map<KClass<*>, String> = mapOf(),
-                        classTransformers: Map<KClass<*>, ClassTransformer> = mapOf(),
-                        defaultTransformer: ClassTransformer? = null)
+                        classTransformers: List<ClassTransformer> = listOf())
 {
-    val generator = TypeScriptGenerator(listOf(klass), mappings, classTransformers, defaultTransformer)
+    val generator = TypeScriptGenerator(listOf(klass), mappings, classTransformers)
 
     val expected = expectedOutput
         .map(TypeScriptDefinitionFactory::fromCode)
@@ -251,8 +250,8 @@ interface ClassWithDependencies {
     interface DataClass {
         PROP: string;
     }
-    """), classTransformers = mapOf(
-            DataClass::class to object: ClassTransformer {
+    """), classTransformers = listOf(
+            object: ClassTransformer {
                 /**
                  * Returns the property name that will be included in the
                  * definition.

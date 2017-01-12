@@ -47,11 +47,11 @@ import kotlin.reflect.jvm.javaType
 class TypeScriptGenerator(
     rootClasses: Iterable<KClass<*>>,
     private val mappings: Map<KClass<*>, String> = mapOf(),
-    private val classTransformers: Map<KClass<*>, ClassTransformer> = mapOf(),
-    private val defaultTransformer: ClassTransformer? = null
+    classTransformers: List<ClassTransformer> = listOf()
 ) {
     private val visitedClasses: MutableSet<KClass<*>> = java.util.HashSet()
     private val generatedDefinitions = mutableListOf<String>()
+    private val pipeline = ClassTransformerPipeline(classTransformers)
 
     init {
         rootClasses.forEach { visitClass(it) }
@@ -165,15 +165,6 @@ class TypeScriptGenerator(
         } else {
             ""
         }
-
-        val pipeline = ClassTransformerPipeline(
-            classTransformers
-                .toSortedMap(KClassComparator())
-                .filter { klass.isSubclassOf(it.key) }
-                .values
-                .plusElement(defaultTransformer)
-                .filterNotNull()
-        )
 
         return "interface ${klass.simpleName}$templateParameters$extendsString {\n" +
             klass.declaredMemberProperties
