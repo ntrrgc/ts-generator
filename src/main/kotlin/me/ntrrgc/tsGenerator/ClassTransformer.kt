@@ -18,12 +18,12 @@ interface ClassTransformer {
      * If it returns null, the value of the next class transformer
      * in the pipeline is used.
      *
-     * @param properties Default properties. By default public,
-     * non-function properties are chosen.
+     * @param properties Property list from previous stage in the pipeline,
+     * by default the public, non-function properties are chosen.
      * @param klass Class the properties come from.
      */
-    fun transformPropertyList(properties: List<KProperty<*>>, klass: KClass<*>): List<KProperty<*>>? {
-        return null
+    fun transformPropertyList(properties: List<KProperty<*>>, klass: KClass<*>): List<KProperty<*>> {
+        return properties
     }
 
     /**
@@ -32,9 +32,15 @@ interface ClassTransformer {
      *
      * If it returns null, the value of the next class transformer
      * in the pipeline is used.
+     *
+     * @param propertyName Property name generated in previous
+     * transformers in the pipeline, by default the original property
+     * name.
+     * @param property The actual property of the class.
+     * @param klass Class the property comes from.
      */
-    fun transformPropertyName(property: KProperty<*>, klass: KClass<*>): String? {
-        return null
+    fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
+        return propertyName
     }
 
     /**
@@ -50,7 +56,7 @@ interface ClassTransformer {
      * created) and its class name is used, with template parameters
      * if necessary.
      */
-    fun transformPropertyType(property: KProperty<*>, klass: KClass<*>): String? {
+    fun overridePropertyType(property: KProperty<*>, klass: KClass<*>): String? {
         return null
     }
 }

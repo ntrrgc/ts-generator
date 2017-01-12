@@ -11,21 +11,25 @@ import kotlin.reflect.KProperty
  */
 internal class ClassTransformerPipeline(val memberTransformers: List<ClassTransformer>): ClassTransformer {
 
-    override fun transformPropertyList(properties: List<KProperty<*>>, klass: KClass<*>): List<KProperty<*>>? {
-        return memberTransformers.firstNotNull { transformer ->
-            transformer.transformPropertyList(properties, klass)
+    override fun transformPropertyList(properties: List<KProperty<*>>, klass: KClass<*>): List<KProperty<*>> {
+        var ret = properties
+        memberTransformers.forEach { transformer ->
+            ret = transformer.transformPropertyList(ret, klass)
         }
+        return ret
     }
 
-    override fun transformPropertyName(property: KProperty<*>, klass: KClass<*>): String? {
-        return memberTransformers.firstNotNull { transformer ->
-            transformer.transformPropertyName(property, klass)
+    override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
+        var ret = propertyName
+        memberTransformers.forEach { transformer ->
+            ret = transformer.transformPropertyName(ret, property, klass)
         }
+        return ret
     }
 
-    override fun transformPropertyType(property: KProperty<*>, klass: KClass<*>): String? {
+    override fun overridePropertyType(property: KProperty<*>, klass: KClass<*>): String? {
         return memberTransformers.firstNotNull { transformer ->
-            transformer.transformPropertyType(property, klass)
+            transformer.overridePropertyType(property, klass)
         }
     }
 }

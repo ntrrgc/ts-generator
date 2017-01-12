@@ -260,8 +260,8 @@ interface ClassWithDependencies {
                  * If it returns null, the value of the next class transformer
                  * in the pipeline is used.
                  */
-                override fun transformPropertyName(property: KProperty<*>, klass: KClass<*>): String? {
-                    return property.name.toUpperCase()
+                override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
+                    return propertyName.toUpperCase()
                 }
             }
         ))

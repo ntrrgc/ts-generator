@@ -184,12 +184,10 @@ class TypeScriptGenerator(
                 .filter { it.visibility == KVisibility.PUBLIC }
                 .let { propertyList ->
                     transformerPipeline.transformPropertyList(propertyList, klass)
-                        ?: propertyList
                 }
                 .map { property ->
-                    val propertyName = transformerPipeline.transformPropertyName(property, klass)
-                        ?: property.name
-                    val propertyType = transformerPipeline.transformPropertyType(property, klass)
+                    val propertyName = transformerPipeline.transformPropertyName(property.name, property, klass)
+                    val propertyType = transformerPipeline.overridePropertyType(property, klass)
                         ?: formatKType(property.returnType).formatWithoutParenthesis()
 
                     "    $propertyName: $propertyType;\n"

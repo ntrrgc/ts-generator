@@ -6,25 +6,25 @@ import kotlin.reflect.KProperty
 class FilteredClassTransformer(val wrappedTransformer: ClassTransformer,
                                val filter: (klass: KClass<*>) -> Boolean): ClassTransformer {
 
-    override fun transformPropertyList(properties: List<KProperty<*>>, klass: KClass<*>): List<KProperty<*>>? {
+    override fun transformPropertyList(properties: List<KProperty<*>>, klass: KClass<*>): List<KProperty<*>> {
         if (filter(klass)) {
             return wrappedTransformer.transformPropertyList(properties, klass)
         } else {
-            return null
+            return properties
         }
     }
 
-    override fun transformPropertyName(property: KProperty<*>, klass: KClass<*>): String? {
+    override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
         if (filter(klass)) {
-            return super.transformPropertyName(property, klass)
+            return super.transformPropertyName(propertyName, property, klass)
         } else {
-            return null
+            return propertyName
         }
     }
 
-    override fun transformPropertyType(property: KProperty<*>, klass: KClass<*>): String? {
+    override fun overridePropertyType(property: KProperty<*>, klass: KClass<*>): String? {
         if (filter(klass)) {
-            return super.transformPropertyType(property, klass)
+            return super.overridePropertyType(property, klass)
         } else {
             return null
         }
