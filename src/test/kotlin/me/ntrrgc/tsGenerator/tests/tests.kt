@@ -320,4 +320,22 @@ interface Widget {
             }
         ))
     }
+
+    it("supports filtering subclasses") {
+        assertGeneratedCode(DerivedClass::class, setOf("""
+    interface DerivedClass extends BaseClass {
+        B: string[];
+    }
+    """, """
+    interface BaseClass {
+        A: int;
+    }
+    """), classTransformers = listOf(
+            object : ClassTransformer {
+                override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
+                    return propertyName.toUpperCase()
+                }
+            }.onlyOnSubclassesOf(BaseClass::class)
+        ))
+    }
 })
