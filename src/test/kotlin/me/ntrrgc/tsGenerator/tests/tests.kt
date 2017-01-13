@@ -361,4 +361,12 @@ interface Widget {
             }
         ))
     }
+
+    it("handles JavaClass") {
+        assertGeneratedCode(JavaClass::class, setOf("""
+    interface JavaClass {
+        name: string;
+    }
+    """))
+    }
 })

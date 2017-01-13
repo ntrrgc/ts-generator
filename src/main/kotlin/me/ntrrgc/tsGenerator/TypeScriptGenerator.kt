@@ -1,5 +1,6 @@
 package me.ntrrgc.tsGenerator
 
+import java.beans.Introspector
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import kotlin.reflect.*
@@ -27,6 +28,7 @@ import kotlin.reflect.jvm.javaType
  *  * Lists as JS arrays
  *  * Maps as JS objects
  *  * Null safety, even inside composite types
+ *  * Java beans
  *  * Mapping types
  *  * Customizing class definitions via transformers
  *  * Parenthesis are placed only when they are needed to disambiguate
@@ -59,6 +61,12 @@ class TypeScriptGenerator(
 
     companion object {
         private val KotlinAnyOrNull = Any::class.createType(nullable = true)
+
+        fun isJavaBeanProperty(kProperty: KProperty<*>, klass: KClass<*>): Boolean {
+            val beanInfo = Introspector.getBeanInfo(klass.java)
+            return beanInfo.propertyDescriptors
+                .any { bean -> bean.name == kProperty.name }
+        }
     }
 
     private fun visitClass(klass: KClass<*>) {
@@ -167,7 +175,9 @@ class TypeScriptGenerator(
         return "interface ${klass.simpleName}$templateParameters$extendsString {\n" +
             klass.declaredMemberProperties
                 .filter { !isFunctionType(it.returnType.javaType) }
-                .filter { it.visibility == KVisibility.PUBLIC }
+                .filter {
+                    it.visibility == KVisibility.PUBLIC || isJavaBeanProperty(it, klass)
+                }
                 .let { propertyList ->
                     pipeline.transformPropertyList(propertyList, klass)
                 }
