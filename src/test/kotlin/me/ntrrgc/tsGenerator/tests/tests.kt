@@ -338,4 +338,27 @@ interface Widget {
             }.onlyOnSubclassesOf(BaseClass::class)
         ))
     }
+
+    it("uses all transformers in pipeline") {
+        assertGeneratedCode(SimpleTypes::class, setOf("""
+    interface SimpleTypes {
+        aString12: string;
+        aDouble12: number;
+        anInt12: int;
+    }
+    """), classTransformers = listOf(
+            object : ClassTransformer {
+                override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
+                    return propertyName + "1"
+                }
+            },
+            object : ClassTransformer {
+            },
+            object : ClassTransformer {
+                override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
+                    return propertyName + "2"
+                }
+            }
+        ))
+    }
 })
