@@ -92,7 +92,8 @@ class TypeScriptGenerator(
         }
 
         val classifierTsType = when (classifier) {
-            String::class -> "string"
+            Boolean::class -> "boolean"
+            String::class, Char::class -> "string"
             Int::class,
             Long::class,
             Short::class,
@@ -108,8 +109,21 @@ class TypeScriptGenerator(
                         // Use native JS array
                         // Parenthesis are needed to disambiguate complex cases,
                         // e.g. (Pair<string|null, int>|null)[]|null
-                        val itemType = formatKType(kType.arguments.single().type ?: KotlinAnyOrNull)
-                        "${itemType.formatWithParenthesis()}[]"
+                        val itemType = when (kType.classifier) {
+                            // Native Java arrays... unfortunately simple array types like these
+                            // are not mapped automatically into kotlin.Array<T> by kotlin-reflect :(
+                            IntArray::class -> Int::class.createType(nullable = false)
+                            ShortArray::class -> Short::class.createType(nullable = false)
+                            ByteArray::class -> Byte::class.createType(nullable = false)
+                            CharArray::class -> Char::class.createType(nullable = false)
+                            LongArray::class -> Long::class.createType(nullable = false)
+                            FloatArray::class -> Float::class.createType(nullable = false)
+                            DoubleArray::class -> Double::class.createType(nullable = false)
+
+                            // Class container types (they use generics)
+                            else -> kType.arguments.single().type ?: KotlinAnyOrNull
+                        }
+                        "${formatKType(itemType).formatWithParenthesis()}[]"
                     } else if (classifier.isSubclassOf(Map::class)) {
                         // Use native JS associative object
                         val keyType = formatKType(kType.arguments[0].type ?: KotlinAnyOrNull)

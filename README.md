@@ -139,3 +139,98 @@ interface Player {
 }
 ```
 
+## Advanced features
+
+This generator can handle more complex data types. Some examples are shown below:
+
+### Inheritance support
+
+```kotlin
+open class BaseClass(val a: Int)
+
+class DerivedClass(val b: List<String>): BaseClass(4)
+
+fun main(args: Array<String>) {
+    println(TypeScriptGenerator(
+        rootClasses = setOf(
+            DerivedClass::class
+        )
+    ).definitionsText)
+}
+```
+
+The output is:
+
+```typescript
+interface BaseClass {
+    a: int;
+}
+
+interface DerivedClass extends BaseClass {
+    b: string[];
+}
+```
+
+### Generics
+
+```kotlin
+class ContrivedExample<A, out B, out C: List<Any>>(
+    private val a: A, 
+    val b: B, 
+    val c: C,
+    val listOfPairs: List<Pair<Int, B>>)
+    
+fun main(args: Array<String>) {
+    println(TypeScriptGenerator(
+        rootClasses = setOf(
+            ContrivedExample::class
+        )
+    ).definitionsText)
+}
+```
+
+The output is:
+
+```typescript
+interface Pair<A, B> {
+    first: A;
+    second: B;
+}
+
+interface ContrivedExample<A, B, C extends any[]> {
+    b: B;
+    c: C;
+    listOfPairs: Pair<int, B>[];
+}
+```
+
+### Maps as JS objects
+
+```kotlin
+data class CardRepository(
+    val cardsByRef: Map<String, Card>)
+```
+
+The output is:
+
+```typescript
+type Rarity = "Normal" | "Rare" | "SuperRare";
+
+interface Card {
+    command: string | null;
+    description: string;
+    generatedTitleLine: string;
+    name: string;
+    rarity: Rarity;
+    ref: string;
+}
+
+interface CardRepository {
+    cardsByRef: { [key: string]: Card };
+}
+```
+
+### Java beans
+
+Sometimes you want to work with Java classes like this one:
+

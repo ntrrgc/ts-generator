@@ -366,6 +366,9 @@ interface Widget {
         assertGeneratedCode(JavaClass::class, setOf("""
     interface JavaClass {
         name: string;
+        results: int[];
+        multidimensional: string[][];
+        finished: boolean;
     }
     """))
     }

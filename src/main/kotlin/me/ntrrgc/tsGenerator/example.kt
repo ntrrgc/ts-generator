@@ -53,7 +53,14 @@ open class BaseClass(val a: Int)
 
 class DerivedClass(val b: List<String>): BaseClass(4)
 
-class Miau<A, out B, out C: List<Any>>(private val a: A, val b: B, val c: C)
+class ContrivedExample<A, out B, out C: List<Any>>(
+    private val a: A,
+    val b: B,
+    val c: C,
+    val listOfPairs: List<Pair<Int, B>>)
+
+data class CardRepository(
+    val cardsByRef: Map<String, Card>)
 
 //data class Thing(
 //    val wow: Map<String, Miau<LocalDateTime, String, List<Card>>>,
@@ -65,9 +72,9 @@ class Miau<A, out B, out C: List<Any>>(private val a: A, val b: B, val c: C)
 fun main(args: Array<String>) {
     println(TypeScriptGenerator(
         rootClasses = setOf(
-            Player::class
+//            Player::class
 //            Thing::class,
-//            BaseClass::class
+            CardRepository::class
 //            Player::class,
 //            Achievement::class,
 //            Card::class,
