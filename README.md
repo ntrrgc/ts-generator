@@ -232,5 +232,66 @@ interface CardRepository {
 
 ### Java beans
 
-Sometimes you want to work with Java classes like this one:
+Sometimes you want to work with long boring Java classes like this one:
 
+```java
+public class JavaClass {
+    private String name;
+    private int[] results;
+    private boolean finished;
+    private char[][] multidimensional;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int[] getResults() {
+        return results;
+    }
+
+    public void setResults(int[] results) {
+        this.results = results;
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public char[][] getMultidimensional() {
+        return multidimensional;
+    }
+
+    public void setMultidimensional(char[][] multidimensional) {
+        this.multidimensional = multidimensional;
+    }
+}
+```
+
+Even though its fields are private, they are accessible through getter methods. The generator knows this, so they are included in the definition:
+
+```typescript
+interface JavaClass {
+    name: string;
+    results: int[];
+    multidimensional: string[][];
+    finished: boolean;
+}
+```
+
+### Transformers
+
+Sometimes they objects you use in TypeScript or JavaScript are not exactly the same you use in your backend, but have some differences, for instance:
+
+* You may transform one type into another.
+* Your classes may use camelCase in the backend but being turned into snake_case in the frontend by the JSON serializer.
+* Some properties of some classes may be not be sent to the frontend.
+
+To support cases like these, `TypeScriptGenerator` supports class transformers. They are objects implementing the `ClassTransformer` interface, arranged in a pipeline. They can be used to customize the list of properties of a class and their name and type.
+
+Below are some examples:
+
+#### Renaming 
