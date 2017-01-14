@@ -1,28 +1,28 @@
-#TypeScript definition generator.
+#TypeScript definition generator for the JVM
 
-Generates the content of a TypeScript definition file (.d.ts) that
-covers a set of Kotlin and Java classes.
+This library generates TypeScript definitions that cover a set of Kotlin and Java classes.
 
 This is useful when data classes are serialized to JSON and
 handled in a JS or TypeScript web frontend.
 
-Supports:
- * Primitive types, with explicit int
- * Kotlin and Java classes
- * Data classes
- * Enums
- * Any type
- * Generic classes, without type erasure
- * Generic constraints
- * Class inheritance
- * Abstract classes
- * Lists as JS arrays
- * Maps as JS objects
- * Null safety, even inside composite types
- * Java beans
- * Mapping types
- * Customizing class definitions via transformers
- * Parenthesis are placed only when they are needed to disambiguate
+This library supports:
+ * Primitive types, with or without explicit int.
+ * Kotlin and Java classes.
+ * Data classes.
+ * Enums.
+ * Any type.
+ * Generic classes, without type erasure.
+ * Generic constraints.
+ * Class inheritance.
+ * Abstract classes.
+ * Lists as JS arrays.
+ * Maps as JS objects.
+ * Null safety, even inside composite types.
+ * Java beans.
+ * Mapping types.
+ * Nullability annotations, when allowed by the retention policy.
+ * Customizing class definitions via transformers.
+ * Parenthesis optimization: They are placed only when they are needed to disambiguate.
  
 ## Installation
 
