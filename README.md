@@ -3,7 +3,7 @@
 This library generates TypeScript definitions that cover a set of Kotlin and Java classes using Kotlin reflection.
 
 TypeScript definitions are useful when data classes are serialized to JSON and
-handled in a JavaScript or TypeScript web frontend.
+handled in a JavaScript or TypeScript web frontend as they enable context-aware type checking and autocompletion in a number of IDEs and editors.
 
 ts-generator supports:
  * Primitive types, with or without explicit int.
