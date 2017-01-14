@@ -2,10 +2,10 @@
 
 This library generates TypeScript definitions that cover a set of Kotlin and Java classes using Kotlin reflection.
 
-This is useful when data classes are serialized to JSON and
+TypeScript definitions are useful when data classes are serialized to JSON and
 handled in a JavaScript or TypeScript web frontend.
 
-This library supports:
+ts-generator supports:
  * Primitive types, with or without explicit int.
  * Kotlin and Java classes.
  * Data classes.
@@ -26,9 +26,9 @@ This library supports:
  
 ## Installation
 
-This library requires Kotlin 1.1, which is EAP at time of writing. This library has been tested with 1.1-M04. 
+ts-generator requires Kotlin 1.1, which is EAP at time of writing. This library has been tested with 1.1-M04. 
 
-This library cannot work with Kotlin 1.0 as its reflection library is not powerful enough to do this transformation. 
+Kotlin 1.0 is not compatible as its reflection library is not powerful enough to do this transformation. 
 
 See [this post](https://blog.jetbrains.com/kotlin/2016/12/kotlin-1-1-m04-is-here/) to see how install Kotlin 1.1 EAP.
 
@@ -46,7 +46,7 @@ dependencies {
 
 ## Basic usage
 
-First you need is your Kotlin or Java classes or interfaces, for instance:
+The first you need is your Kotlin or Java classes or interfaces, for instance:
 
 ```kotlin
 enum class Rarity(val abbreviation: String) {
