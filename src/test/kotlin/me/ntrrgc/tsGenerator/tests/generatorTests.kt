@@ -33,7 +33,8 @@ fun assertGeneratedCode(klass: KClass<*>,
                         classTransformers: List<ClassTransformer> = listOf(),
                         ignoreSuperclasses: Set<KClass<*>> = setOf())
 {
-    val generator = TypeScriptGenerator(listOf(klass), mappings, classTransformers, ignoreSuperclasses)
+    val generator = TypeScriptGenerator(listOf(klass), mappings, classTransformers,
+        ignoreSuperclasses, intTypeName = "int")
 
     val expected = expectedOutput
         .map(TypeScriptDefinitionFactory::fromCode)

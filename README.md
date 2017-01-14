@@ -108,7 +108,7 @@ You will get an output like this:
 ```typescript
 interface AchievementCompletionState {
     achievementRef: string;
-    reachedValue: int;
+    reachedValue: number;
 }
 
 type Rarity = "Normal" | "Rare" | "SuperRare";
@@ -159,6 +159,38 @@ This can be done with the `mappings` argument of `TypeScriptGenerator`, as show 
 
 Note the types mapped with this feature are emitted as they were written without any further processing. This is intended to support native JS types not defined in the Kotlin or Java backend.
 
+### Int type
+
+Currently TypeScript only supports one number type: `number`. 
+
+This may change if [a proposal for int types](https://github.com/Microsoft/TypeScript/issues/4639) succeeds. Also, some people may want to be extra explicit and do:
+
+```typescript
+type int = number;
+```
+
+In order to be able to document if a type may or may not be integer. In any case, you can instruct `TypeScriptGenerator` to use explicit `int` with the `intTypeName` parameter. For instance:
+ 
+```kotlin
+fun main(args: Array<String>) {
+    println(TypeScriptGenerator(
+        rootClasses = setOf(
+            AchievementCompletionState::class
+        ),
+        intTypeName = "int"
+    ).definitionsText)
+}
+```
+
+The output will be:
+
+```typescript
+interface AchievementCompletionState {
+    achievementRef: string;
+    reachedValue: int;
+}
+```
+
 ### Inheritance support
 
 ```kotlin
@@ -179,7 +211,7 @@ The output is:
 
 ```typescript
 interface BaseClass {
-    a: int;
+    a: number;
 }
 
 interface DerivedClass extends BaseClass {
@@ -218,7 +250,7 @@ interface Pair<A, B> {
 interface ContrivedExample<A, B, C extends any[]> {
     b: B;
     c: C;
-    listOfPairs: Pair<int, B>[];
+    listOfPairs: Pair<number, B>[];
 }
 ```
 
@@ -280,7 +312,7 @@ Even though its fields are private, they are accessible through getter methods. 
 ```typescript
 interface JavaClass {
     name: string;
-    results: int[];
+    results: number[];
     multidimensional: string[][];
     finished: boolean;
 }
@@ -336,8 +368,8 @@ The output is the following:
 ```typescript
 interface JavaClassWithNonnullAsDefault {
     name: string;
-    results: int[];
-    nextResults: int[] | null;
+    results: number[];
+    nextResults: number[] | null;
 }
 ```
 
@@ -396,7 +428,7 @@ The output is:
 ```typescript
 interface Achievement {
     description: string;
-    neededValue: int;
+    neededValue: number;
     title: string;
 }
 ```
@@ -437,7 +469,7 @@ The output is:
 ```typescript
 interface AchievementCompletionState {
     achievement_ref: string;
-    reached_value: int;
+    reached_value: number;
 }
 ```
 
@@ -493,14 +525,14 @@ The output is:
 ```typescript
 interface Achievement {
     description: string;
-    neededValue: int;
+    neededValue: number;
     ref: string;
     title: string;
 }
 
 interface AchievementCompletionState {
     achievement: Achievement;
-    reachedValue: int;
+    reachedValue: number;
 }
 ```
 

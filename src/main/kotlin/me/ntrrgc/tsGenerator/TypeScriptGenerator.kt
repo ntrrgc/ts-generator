@@ -65,12 +65,17 @@ import kotlin.reflect.jvm.javaType
  * @param ignoreSuperclasses Classes and interfaces specified here will
  * not be emitted when they are used as superclasses or implemented
  * interfaces of a class.
+ *
+ * @param intTypeName Defines the name integer numbers will be emitted as.
+ * By default it's number, but can be changed to int if the TypeScript
+ * version used supports it or the user wants to be extra explicit.
  */
 class TypeScriptGenerator(
     rootClasses: Iterable<KClass<*>>,
     private val mappings: Map<KClass<*>, String> = mapOf(),
     classTransformers: List<ClassTransformer> = listOf(),
-    ignoreSuperclasses: Set<KClass<*>> = setOf()
+    ignoreSuperclasses: Set<KClass<*>> = setOf(),
+    private val intTypeName: String = "number"
 ) {
     private val visitedClasses: MutableSet<KClass<*>> = java.util.HashSet()
     private val generatedDefinitions = mutableListOf<String>()
@@ -123,7 +128,7 @@ class TypeScriptGenerator(
             Int::class,
             Long::class,
             Short::class,
-            Byte::class -> "int"
+            Byte::class -> intTypeName
             Float::class, Double::class -> "number"
             Any::class -> "any"
             else -> {
