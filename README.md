@@ -1,9 +1,9 @@
 #TypeScript definition generator for the JVM
 
-This library generates TypeScript definitions that cover a set of Kotlin and Java classes.
+This library generates TypeScript definitions that cover a set of Kotlin and Java classes using Kotlin reflection.
 
 This is useful when data classes are serialized to JSON and
-handled in a JS or TypeScript web frontend.
+handled in a JavaScript or TypeScript web frontend.
 
 This library supports:
  * Primitive types, with or without explicit int.
@@ -32,8 +32,17 @@ This library cannot work with Kotlin 1.0 as its reflection library is not powerf
 
 See [this post](https://blog.jetbrains.com/kotlin/2016/12/kotlin-1-1-m04-is-here/) to see how install Kotlin 1.1 EAP.
 
-Then you need to include this library in your project.
+Then you need to include this library in your project. The easiest way is to [download it from JitPack](https://jitpack.io/#ntrrgc/ts-generator). For instance, in Gradle you would add this to `build.gradle`:
 
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compile 'com.github.ntrrgc:ts-generator:1.0.0-pre1'
+}
+```
 
 ## Basic usage
 
