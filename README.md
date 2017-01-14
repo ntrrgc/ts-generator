@@ -139,6 +139,14 @@ interface Player {
 }
 ```
 
+Then you can paste it into a `.d.ts` file and declare it in your environment, e.g:
+ 
+ * TypeScript: Just add the file to your project.
+ * JS with Visual Studio Code: Create a `jsconfig.json` in Visual Code and adding it in the `include` section of `typeAcquisition`. [You can read more about type adquisition in the VS Code documentation.](https://code.visualstudio.com/Docs/languages/javascript#_automatic-type-acquisition)
+ * IntelliJ/WebStorm/PHPStorm: Open the Settings and look for *Libraries* inside *JavaScript*. Click *Add* and create a new library declaration adding the created definition file. [Read more about it in the documentation](https://www.jetbrains.com/help/idea/2016.3/configuring-javascript-libraries.html)
+  
+![](vscode_screenshot.png)
+
 ## Advanced features
 
 This generator can handle more complex data types. Some examples are shown below:
