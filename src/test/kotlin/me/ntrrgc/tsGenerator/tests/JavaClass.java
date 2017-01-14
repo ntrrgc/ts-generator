@@ -26,10 +26,6 @@ public class JavaClass {
         return finished;
     }
 
-    public void setFinished(boolean finished) {
-        this.finished = finished;
-    }
-
     public char[][] getMultidimensional() {
         return multidimensional;
     }
