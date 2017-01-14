@@ -45,15 +45,25 @@ import kotlin.reflect.jvm.javaType
  * @param classTransformers Special transformers for certain subclasses.
  * They allow to filter out some classes, customize what methods are
  * exported, how they names are generated and what types are generated.
+ *
+ * @param ignoreSuperclasses Classes and interfaces specified here will
+ * not be emitted when they are used as superclasses or implemented
+ * interfaces of a class.
  */
 class TypeScriptGenerator(
     rootClasses: Iterable<KClass<*>>,
     private val mappings: Map<KClass<*>, String> = mapOf(),
-    classTransformers: List<ClassTransformer> = listOf()
+    classTransformers: List<ClassTransformer> = listOf(),
+    ignoreSuperclasses: Set<KClass<*>> = setOf()
 ) {
     private val visitedClasses: MutableSet<KClass<*>> = java.util.HashSet()
     private val generatedDefinitions = mutableListOf<String>()
     private val pipeline = ClassTransformerPipeline(classTransformers)
+    private val ignoredSuperclasses = setOf(
+        Any::class,
+        java.io.Serializable::class,
+        Comparable::class
+    ).plus(ignoreSuperclasses)
 
     init {
         rootClasses.forEach { visitClass(it) }
@@ -159,7 +169,7 @@ class TypeScriptGenerator(
 
     private fun generateInterface(klass: KClass<*>): String {
         val superclasses = klass.superclasses
-            .filterNot { it in setOf(Any::class, java.io.Serializable::class, Comparable::class) }
+            .filterNot { it in ignoredSuperclasses }
         val extendsString = if (superclasses.isNotEmpty()) {
             " extends " + superclasses
                 .map { formatClassType(it) }

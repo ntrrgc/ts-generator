@@ -14,9 +14,10 @@ import kotlin.reflect.createType
 fun assertGeneratedCode(klass: KClass<*>,
                         expectedOutput: Set<String>,
                         mappings: Map<KClass<*>, String> = mapOf(),
-                        classTransformers: List<ClassTransformer> = listOf())
+                        classTransformers: List<ClassTransformer> = listOf(),
+                        ignoreSuperclasses: Set<KClass<*>> = setOf())
 {
-    val generator = TypeScriptGenerator(listOf(klass), mappings, classTransformers)
+    val generator = TypeScriptGenerator(listOf(klass), mappings, classTransformers, ignoreSuperclasses)
 
     val expected = expectedOutput
         .map(TypeScriptDefinitionFactory::fromCode)

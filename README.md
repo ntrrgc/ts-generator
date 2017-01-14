@@ -179,7 +179,7 @@ interface DerivedClass extends BaseClass {
 }
 ```
 
-By default `Serializable` and `Comparable` are not emitted.
+By default `Serializable` and `Comparable` interfaces are not emitted. You can filter out more interfaces or classes by using the `ignoreSuperclasses` parameter of the `TypeScriptGenerator` constructor.
 
 ### Generics
 
