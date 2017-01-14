@@ -40,4 +40,5 @@ dependencies {
     testCompile 'org.jetbrains.spek:spek-api:1.1.0-beta3'
     testRuntime 'org.junit.platform:junit-platform-launcher:1.0.0-M3'
     testRuntime 'org.jetbrains.spek:spek-junit-platform-engine:1.1.0-beta3'
+    testCompile 'com.google.code.findbugs:jsr305:3.0.1'
 }

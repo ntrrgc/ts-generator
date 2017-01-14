@@ -251,32 +251,18 @@ public class JavaClass {
     private boolean finished;
     private char[][] multidimensional;
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public int[] getResults() { return results; }
+    public void setResults(int[] results) { this.results = results; }
 
-    public int[] getResults() {
-        return results;
-    }
+    // setters are not required for this to work!
+    public boolean isFinished() { return finished; }
 
-    public void setResults(int[] results) {
-        this.results = results;
-    }
-
-    public boolean isFinished() {
-        return finished;
-    }
-
-    public char[][] getMultidimensional() {
-        return multidimensional;
-    }
-
-    public void setMultidimensional(char[][] multidimensional) {
-        this.multidimensional = multidimensional;
+    public char[][] getMultidimensional() { return multidimensional; }
+    public void setMultidimensional(char[][] multidimensional) { 
+        this.multidimensional = multidimensional; 
     }
 }
 ```
@@ -289,6 +275,61 @@ interface JavaClass {
     results: int[];
     multidimensional: string[][];
     finished: boolean;
+}
+```
+
+### Java nullability annotations
+
+Kotlin was designed with null-safety in mind, but the Java land is not so green.
+
+In Java all types are nullable by default, so the programmer needs some way to annotate which may and which will never be null. There are many ways to do this, each with its own set of drawbacks.
+
+The TypeScript generator makes no effort by itself to infer the nullability of Java types. Nevertheless kotlin-reflect is capable of decoding it if the classes are annotated with JSR305 annotations (`javax.annotation.*`). If no annotations are found, the types are assumed to be not null.
+
+Note that `org.jetbrains.annotations.*` and `android.support.annotation.*` **cannot** work for this purpose, as they don't have [runtime retention](https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/Retention.html) and therefore are stripped by the compiler without leaving a way to read them through reflection.
+
+The following an example of a class with supported annotations:
+
+```java
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+
+// Add this to Gradle/Maven to get the annotations:
+// compile 'com.google.code.findbugs:jsr305:3.0.1'
+
+@ParametersAreNonnullByDefault
+public class JavaClassWithNonnullAsDefault {
+    private int[] results;
+
+    @Nullable
+    private int[] nextResults;
+
+    JavaClassWithNonnullAsDefault(
+        int[] results, 
+        @Nullable int[] nextResults)
+    {
+        this.results = results;
+        this.nextResults = nextResults;
+    }
+
+    public int[] getResults() { return results; }
+    public void setResults(int[] results) { this.results = results; }
+
+    @Nullable
+    public int[] getNextResults() { return nextResults; }
+    public void setNextResults(@Nullable int[] nextResults) {
+        this.nextResults = nextResults;
+    }
+}
+```
+
+The output is the following:
+
+```typescript
+interface JavaClassWithNonnullAsDefault {
+    name: string;
+    results: int[];
+    nextResults: int[] | null;
 }
 ```
 
@@ -489,5 +530,59 @@ fun main(args: Array<String>) {
             }.onlyOnSubclassesOf(Achievement::class)
         )
     ).definitionsText)
+}
+```
+
+### Optional\<T\> unwrapping
+
+This is an example of a more complex transformer that can be used to unwrap `Optional<T>` into `T | null`.
+
+Let's suppose a Java class like this:
+
+```java
+public class JavaClassWithOptional {
+    private String name;
+    private String surname;
+
+    public Optional<String> getSurname() {
+        return Optional.ofNullable(surname);
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+```
+
+We could use this transformer:
+
+```kotlin
+object : ClassTransformer {
+    override fun transformPropertyType(
+        type: KType,
+        property: KProperty<*>,
+        klass: KClass<*>
+    ): KType {
+        val bean = Introspector.getBeanInfo(klass.java)
+            .propertyDescriptors
+            .find { it.name == property.name }
+
+        val getterReturnType = bean?.readMethod?.kotlinFunction?.returnType
+        if (getterReturnType?.classifier == Optional::class) {
+            val wrappedType = getterReturnType.arguments.first().type!!
+            return wrappedType.withNullability(true)
+        } else {
+            return type
+        }
+    }
+}
+```
+
+The result would be this:
+
+```typescript
+interface JavaClassWithOptional {
+    name: string;
+    surname: string | null;
 }
 ```

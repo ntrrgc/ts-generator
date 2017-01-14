@@ -6,10 +6,10 @@ import me.ntrrgc.tsGenerator.TypeScriptGenerator
 import me.ntrrgc.tsGenerator.onlyOnSubclassesOf
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
-import kotlin.reflect.KType
-import kotlin.reflect.createType
+import java.beans.Introspector
+import java.util.*
+import kotlin.reflect.*
+import kotlin.reflect.jvm.kotlinFunction
 
 fun assertGeneratedCode(klass: KClass<*>,
                         expectedOutput: Set<String>,
@@ -372,5 +372,54 @@ interface Widget {
         finished: boolean;
     }
     """))
+    }
+
+    it("handles JavaClassWithNullables") {
+        assertGeneratedCode(JavaClassWithNullables::class, setOf("""
+    interface JavaClassWithNullables {
+        name: string;
+        results: int[];
+        nextResults: int[] | null;
+    }
+    """))
+    }
+
+    it("handles JavaClassWithNonnullAsDefault") {
+        assertGeneratedCode(JavaClassWithNonnullAsDefault::class, setOf("""
+    interface JavaClassWithNonnullAsDefault {
+        name: string;
+        results: int[];
+        nextResults: int[] | null;
+    }
+    """))
+    }
+
+    it("handles JavaClassWithOptional") {
+        assertGeneratedCode(JavaClassWithOptional::class, setOf("""
+    interface JavaClassWithOptional {
+        name: string;
+        surname: string | null;
+    }
+    """), classTransformers = listOf(
+            object : ClassTransformer {
+                override fun transformPropertyType(
+                    type: KType,
+                    property: KProperty<*>,
+                    klass: KClass<*>
+                ): KType {
+                    val bean = Introspector.getBeanInfo(klass.java)
+                        .propertyDescriptors
+                        .find { it.name == property.name }
+
+                    val getterReturnType = bean?.readMethod?.kotlinFunction?.returnType
+                    if (getterReturnType?.classifier == Optional::class) {
+                        val wrappedType = getterReturnType.arguments.first().type!!
+                        return wrappedType.withNullability(true)
+                    } else {
+                        return type
+                    }
+                }
+            }
+        ))
     }
 })
