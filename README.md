@@ -143,6 +143,14 @@ interface Player {
 
 This generator can handle more complex data types. Some examples are shown below:
 
+### Mapping types
+
+Sometimes you want to map certain Kotlin or Java classes to native JS types, like `Date`. 
+
+This can be done with the `mappings` argument of `TypeScriptGenerator`, as show in the first example. 
+
+Note the types mapped with this feature are emitted as they were written without any further processing. This is intended to support native JS types not defined in the Kotlin or Java backend.
+
 ### Inheritance support
 
 ```kotlin
@@ -170,6 +178,8 @@ interface DerivedClass extends BaseClass {
     b: string[];
 }
 ```
+
+By default `Serializable` and `Comparable` are not emitted.
 
 ### Generics
 
@@ -294,4 +304,190 @@ To support cases like these, `TypeScriptGenerator` supports class transformers. 
 
 Below are some examples:
 
-#### Renaming 
+#### Filtering unwanted properties
+
+In the following example, assume we don't want to emit `ref`:
+
+```kotlin
+data class Achievement(
+    val ref: String,
+    val title: String,
+    val description: String,
+    val measuredProperty: (player: Player) -> Int,
+    val neededValue: Int
+)
+```
+
+We can use the `transformPropertyList()` to remove it.
+
+```kotlin
+fun main(args: Array<String>) {
+    println(TypeScriptGenerator(
+        rootClasses = setOf(
+            Achievement::class
+        ),
+        classTransformers = listOf(
+            object : ClassTransformer {
+                override fun transformPropertyList(
+                    properties: List<KProperty<*>>,
+                    klass: KClass<*>
+                ): List<KProperty<*>> {
+                    return properties.filter { property ->
+                        property.name != "ref"
+                    }
+                }
+            }
+        )
+    ).definitionsText)
+}
+```
+
+The output is:
+
+```typescript
+interface Achievement {
+    description: string;
+    neededValue: int;
+    title: string;
+}
+```
+
+#### Renaming to snake_case
+
+You can use `transformPropertyName()` to rename any property.
+
+The functions `camelCaseToSnakeCase()` and `snakeCaseToCamelCase()` are included in this library.
+
+```kotlin
+data class AchievementCompletionState(
+    val achievementRef: String,
+    val reachedValue: Int)
+
+fun main(args: Array<String>) {
+    println(TypeScriptGenerator(
+        rootClasses = setOf(
+            AchievementCompletionState::class
+        ),
+        classTransformers = listOf(
+            object : ClassTransformer {
+                override fun transformPropertyName(
+                    propertyName: String,
+                    property: KProperty<*>,
+                    klass: KClass<*>
+                ): String {
+                    return camelCaseToSnakeCase(propertyName)
+                }
+            }
+        )
+    ).definitionsText)
+}
+```
+
+The output is:
+
+```typescript
+interface AchievementCompletionState {
+    achievement_ref: string;
+    reached_value: int;
+}
+```
+
+#### Replacing types for some properties
+
+Imagine in our previous example we don't want to emit `achievement_ref` with type `string`, but rather `achievement`, with type `Achievement`. 
+
+We can use a combination of `transformPropertyName()` and `transformPropertyType()` for this purpose:
+
+```typescript
+fun main(args: Array<String>) {
+    println(TypeScriptGenerator(
+        rootClasses = setOf(
+            AchievementCompletionState::class
+        ),
+        classTransformers = listOf(
+            object : ClassTransformer {
+                override fun transformPropertyName(
+                    propertyName: String, 
+                    property: KProperty<*>, 
+                    klass: KClass<*>
+                ): String {
+                    if (propertyName == "achievementRef") {
+                        return "achievement"
+                    } else {
+                        return propertyName
+                    }
+                }
+
+                override fun transformPropertyType(
+                    type: KType, 
+                    property: KProperty<*>, 
+                    klass: KClass<*>
+                ): KType {
+                    // Note: property is the actual property from the class
+                    // (unless replaced in transformPropertyList()), so
+                    // it maintains the original property name declared
+                    // in the code.
+                    if (property.name == "achievementRef") {
+                        return Achievement::class.createType(nullable = false)
+                    } else {
+                        return type
+                    }
+                }
+            }
+        )
+    ).definitionsText)
+}
+```
+
+The output is:
+
+```typescript
+interface Achievement {
+    description: string;
+    neededValue: int;
+    ref: string;
+    title: string;
+}
+
+interface AchievementCompletionState {
+    achievement: Achievement;
+    reachedValue: int;
+}
+```
+
+Note how `Achievement` class is emitted recursively after the transformation has taken place, even though it was not declared in the original `AchievementCompletionState` class nor specified in `rootClasses`.
+
+### Applying transformers only to some classes
+
+Transformers are applied to all classes by default. If you want your transformers to apply only to classes matching a certain predicate, you can wrap them in an instance of `FilteredClassTransformer`. This is its definition:
+ 
+ ```kotlin
+class FilteredClassTransformer(
+    val wrappedTransformer: ClassTransformer,
+    val filter: (klass: KClass<*>) -> Boolean
+): ClassTransformer
+```
+
+For the common case of applying a transformer only on a class and its subclasses if any, an extension method is provided, `.onlyOnSubclassesOf()`:
+ 
+```kotlin
+fun main(args: Array<String>) {
+    println(TypeScriptGenerator(
+        rootClasses = setOf(
+            Achievement::class
+        ),
+        classTransformers = listOf(
+            object : ClassTransformer {
+                override fun transformPropertyList(
+                    properties: List<KProperty<*>>,
+                    klass: KClass<*>
+                ): List<KProperty<*>> {
+                    return properties.filter { property ->
+                        property.name != "ref"
+                    }
+                }
+            }.onlyOnSubclassesOf(Achievement::class)
+        )
+    ).definitionsText)
+}
+```

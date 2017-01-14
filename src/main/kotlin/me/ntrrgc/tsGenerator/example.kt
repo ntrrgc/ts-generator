@@ -2,6 +2,10 @@ package me.ntrrgc.tsGenerator
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
+import kotlin.reflect.KType
+import kotlin.reflect.createType
 
 enum class Rarity(val abbreviation: String) {
     Normal("N"),
@@ -72,10 +76,40 @@ data class CardRepository(
 fun main(args: Array<String>) {
     println(TypeScriptGenerator(
         rootClasses = setOf(
+            AchievementCompletionState::class
+        ),
+        classTransformers = listOf(
+            object : ClassTransformer {
+                override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
+                    if (propertyName == "achievementRef") {
+                        return "achievement"
+                    } else {
+                        return propertyName
+                    }
+                }
+
+                override fun transformPropertyType(type: KType, property: KProperty<*>, klass: KClass<*>): KType {
+                    // Note: property is the actual property from the class
+                    // (unless replaced in transformPropertyList()), so
+                    // it maintains the original property name declared
+                    // in the code.
+                    if (property.name == "achievementRef") {
+                        return Achievement::class.createType(nullable = false)
+                    } else {
+                        return type
+                    }
+                }
+            }
+        )
+    ).definitionsText)
+    return
+
+    println(TypeScriptGenerator(
+        rootClasses = setOf(
 //            Player::class
 //            Thing::class,
-            CardRepository::class
-//            Player::class,
+//            CardRepository::class
+            AchievementCompletionState::class
 //            Achievement::class,
 //            Card::class,
 //            Candy::class
@@ -83,6 +117,17 @@ fun main(args: Array<String>) {
         mappings = mapOf(
             LocalDateTime::class to "Date",
             LocalDate::class to "Date"
+        ),
+        classTransformers = listOf(
+            object : ClassTransformer {
+                override fun transformPropertyName(
+                    propertyName: String,
+                    property: KProperty<*>,
+                    klass: KClass<*>): String
+                {
+                    return camelCaseToSnakeCase(propertyName)
+                }
+            }
         )
 //        classTransformers = mapOf(BaseClass::class to object :ClassTransformer {
 //            override fun transformPropertyName(property: KProperty<*>, klass: KClass<*>): String? {
