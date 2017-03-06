@@ -17,7 +17,7 @@
 package me.ntrrgc.tsGenerator
 
 import kotlin.reflect.KClass
-import kotlin.reflect.isSubclassOf
+import kotlin.reflect.full.isSubclassOf
 
 /**
  * Used to sort classes so that more specific instances are

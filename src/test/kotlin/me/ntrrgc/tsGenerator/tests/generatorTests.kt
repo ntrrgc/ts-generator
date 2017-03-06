@@ -24,7 +24,11 @@ import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
 import java.beans.Introspector
 import java.util.*
-import kotlin.reflect.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
+import kotlin.reflect.KType
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.withNullability
 import kotlin.reflect.jvm.kotlinFunction
 
 fun assertGeneratedCode(klass: KClass<*>,

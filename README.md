@@ -26,11 +26,7 @@ ts-generator supports:
  
 ## Installation
 
-ts-generator requires Kotlin 1.1, which is EAP at time of writing. This library has been tested with 1.1-M04. 
-
-Kotlin 1.0 is not compatible as its reflection library is not powerful enough to do this transformation. 
-
-See [this post](https://blog.jetbrains.com/kotlin/2016/12/kotlin-1-1-m04-is-here/) to see how install Kotlin 1.1 EAP.
+ts-generator requires Kotlin 1.1. Kotlin 1.0 is not compatible as its reflection library is not powerful enough to do this transformation. 
 
 Then you need to include this library in your project. The easiest way is to [download it from JitPack](https://jitpack.io/#ntrrgc/ts-generator). For instance, in Gradle you would add this to `build.gradle`:
 
@@ -40,7 +36,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.ntrrgc:ts-generator:1.0.0-pre1'
+    compile 'com.github.ntrrgc:ts-generator:1.0.0'
 }
 ```
 

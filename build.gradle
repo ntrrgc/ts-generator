@@ -15,13 +15,12 @@
  */
 
 group 'me.ntrrgc'
-version '1.0.0-pre1'
+version '1.0.0'
 
 buildscript {
-    ext.kotlin_version = '1.1-M04'
+    ext.kotlin_version = '1.1.0'
 
     repositories {
-        maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.1' }
         mavenCentral()
     }
     dependencies {
@@ -43,7 +42,6 @@ junitPlatform {
 apply plugin: 'kotlin'
 
 repositories {
-    maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.1' }
     maven { url "https://dl.bintray.com/jetbrains/spek" }
     mavenCentral()
 }
