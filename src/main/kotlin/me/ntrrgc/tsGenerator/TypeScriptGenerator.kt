@@ -24,6 +24,7 @@ import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.javaType
+import me.ntrrgc.tsGenerator.defaultEnumTransformer
 
 /**
  * TypeScript definition generator.
@@ -79,7 +80,8 @@ class TypeScriptGenerator(
     classTransformers: List<ClassTransformer> = listOf(),
     ignoreSuperclasses: Set<KClass<*>> = setOf(),
     private val intTypeName: String = "number",
-    addExportStatements: Boolean = false
+    addExportStatements: Boolean = false,
+    private val enumTransformer: (KClass<*>, Any) -> String = ::defaultEnumTransformer
 ) {
     private val visitedClasses: MutableSet<KClass<*>> = java.util.HashSet()
     private val generatedDefinitions = mutableListOf<String>()
@@ -185,10 +187,9 @@ class TypeScriptGenerator(
     }
 
     private fun generateEnum(klass: KClass<*>): String {
-        return "type ${klass.simpleName} = ${klass.java.enumConstants
-            .map { constant: Any ->
-                constant.toString().toJSString()
         return "${export}type ${klass.simpleName} = ${klass.java.enumConstants
+            .map { constant: Any -> 
+                enumTransformer(klass, constant).toJSString()
             }
             .joinToString(" | ")
         };"
@@ -223,7 +224,6 @@ class TypeScriptGenerator(
             ""
         }
 
-        return "interface ${klass.simpleName}$templateParameters$extendsString {\n" +
         return "${export}interface ${klass.simpleName}$templateParameters$extendsString {\n" +
             klass.declaredMemberProperties
                 .filter { !isFunctionType(it.returnType.javaType) }
