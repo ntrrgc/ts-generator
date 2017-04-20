@@ -1,4 +1,4 @@
-#TypeScript definition generator for the JVM
+# TypeScript definition generator for the JVM
 
 This library generates TypeScript definitions that cover a set of Kotlin and Java classes using Kotlin reflection.
 
