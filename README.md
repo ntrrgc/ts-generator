@@ -23,6 +23,7 @@ ts-generator supports:
  * Nullability annotations, when allowed by the retention policy.
  * Customizing class definitions via transformers.
  * Parenthesis optimization: They are placed only when they are needed to disambiguate.
+ * Emitting either `null` or `undefined` for JVM nullable types.
  
 ## Installation
 
@@ -36,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.ntrrgc:ts-generator:1.0.0'
+    compile 'com.github.ntrrgc:ts-generator:1.1.0'
 }
 ```
 
