@@ -78,7 +78,8 @@ class TypeScriptGenerator(
     private val mappings: Map<KClass<*>, String> = mapOf(),
     classTransformers: List<ClassTransformer> = listOf(),
     ignoreSuperclasses: Set<KClass<*>> = setOf(),
-    private val intTypeName: String = "number"
+    private val intTypeName: String = "number",
+    private val voidType: VoidType = VoidType.NULL
 ) {
     private val visitedClasses: MutableSet<KClass<*>> = java.util.HashSet()
     private val generatedDefinitions = mutableListOf<String>()
@@ -121,7 +122,7 @@ class TypeScriptGenerator(
         if (classifier is KClass<*>) {
             val existingMapping = mappings[classifier]
             if (existingMapping != null) {
-                return TypeScriptType.single(mappings[classifier]!!, false)
+                return TypeScriptType.single(mappings[classifier]!!, false, voidType)
             }
         }
 
@@ -179,7 +180,7 @@ class TypeScriptGenerator(
             }
         }
 
-        return TypeScriptType.single(classifierTsType, kType.isMarkedNullable)
+        return TypeScriptType.single(classifierTsType, kType.isMarkedNullable, voidType)
     }
 
     private fun generateEnum(klass: KClass<*>): String {

@@ -19,6 +19,7 @@ package me.ntrrgc.tsGenerator.tests
 import com.winterbe.expekt.should
 import me.ntrrgc.tsGenerator.ClassTransformer
 import me.ntrrgc.tsGenerator.TypeScriptGenerator
+import me.ntrrgc.tsGenerator.VoidType
 import me.ntrrgc.tsGenerator.onlyOnSubclassesOf
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
@@ -35,10 +36,11 @@ fun assertGeneratedCode(klass: KClass<*>,
                         expectedOutput: Set<String>,
                         mappings: Map<KClass<*>, String> = mapOf(),
                         classTransformers: List<ClassTransformer> = listOf(),
-                        ignoreSuperclasses: Set<KClass<*>> = setOf())
+                        ignoreSuperclasses: Set<KClass<*>> = setOf(),
+                        voidType: VoidType = VoidType.NULL)
 {
     val generator = TypeScriptGenerator(listOf(klass), mappings, classTransformers,
-        ignoreSuperclasses, intTypeName = "int")
+        ignoreSuperclasses, intTypeName = "int", voidType = voidType)
 
     val expected = expectedOutput
         .map(TypeScriptDefinitionFactory::fromCode)
@@ -442,5 +444,14 @@ interface Widget {
                 }
             }
         ))
+    }
+
+    it("handles ClassWithComplexNullables when serializing as undefined") {
+        assertGeneratedCode(ClassWithComplexNullables::class, setOf("""
+    interface ClassWithComplexNullables {
+        maybeWidgets: (string | undefined)[] | undefined;
+        maybeWidgetsArray: (string | undefined)[] | undefined;
+    }
+    """), voidType = VoidType.UNDEFINED)
     }
 })
