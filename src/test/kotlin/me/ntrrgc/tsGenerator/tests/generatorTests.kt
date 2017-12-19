@@ -49,7 +49,7 @@ fun assertGeneratedCode(klass: KClass<*>,
         .map(TypeScriptDefinitionFactory::fromCode)
         .toSet()
 
-    expected.should.equal(actual)
+    actual.should.equal(expected)
 }
 
 class Empty
