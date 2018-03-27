@@ -4,3 +4,5 @@ build
 *~
 *.swp
 out
+gradle.properties
+*.iml
