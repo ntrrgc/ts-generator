@@ -51,6 +51,7 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile 'org.reflections:reflections:0.9.11'
 
     testCompile "com.winterbe:expekt:0.5.0"
     testCompile "org.jetbrains.spek:spek-api:$spek_version"
