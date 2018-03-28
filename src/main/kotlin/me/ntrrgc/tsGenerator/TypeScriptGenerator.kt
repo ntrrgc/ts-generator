@@ -88,7 +88,7 @@ class TypeScriptGenerator(
     ).plus(ignoreSuperclasses)
 
     private val generatedDefinitions = mapClasses { klass -> generateDefinition(klass) }
-    private val generatedInstanceChecks = mapClasses { klass -> generateInstanceChecks(klass) }
+    private val generatedInstanceChecks = mapClasses { klass -> generateInstanceChecks(klass) }.filter { it.isNotBlank() }
 
     private interface VisitorContext {
         fun visitClass(klass: KClass<*>)
@@ -341,7 +341,21 @@ class TypeScriptGenerator(
                 .map { (fieldName, typeName) ->
                     getTypeCheck("obj.$fieldName", typeName)
                 }
-                .joinToString(" && ")
+                .joinToString("\n            && ")
+    }
+
+    private fun generateEnumChecker(klass: KClass<*>): String {
+        val body = klass.java.enumConstants
+                .map { constant: Any ->
+                    "obj === ${constant.toString().toJSString()}"
+                }
+                .joinToString(" || ")
+
+        return body.let {
+            if (it.isNotBlank())
+                "export function is${klass.simpleName}(obj: any): obj is ${klass.simpleName} {\n    return $body;\n}"
+            else ""
+        }
     }
 
     private fun VisitorContext.generateInstanceChecker(klass: KClass<*>, sealedClass: KClass<*>? = null): String {
@@ -381,7 +395,7 @@ class TypeScriptGenerator(
 
     private fun VisitorContext.generateInstanceChecks(klass: KClass<*>): String {
         return when {
-            klass.java.isEnum -> ""
+            klass.java.isEnum -> generateEnumChecker(klass)
             klass.isSealed -> generateSealedClassInstanceCheckers(klass)
             else -> generateInstanceChecker(klass)
         }

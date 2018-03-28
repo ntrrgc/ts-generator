@@ -32,21 +32,21 @@ import kotlin.reflect.full.createType
 import kotlin.reflect.full.withNullability
 import kotlin.reflect.jvm.kotlinFunction
 
-fun assertGeneratedCode(klass: KClass<*>,
+inline fun <reified T: Any> assertGeneratedCode(
                         expectedOutput: Set<String>,
                         mappings: Map<KClass<*>, String> = mapOf(),
                         classTransformers: List<ClassTransformer> = listOf(),
                         ignoreSuperclasses: Set<KClass<*>> = setOf(),
                         voidType: VoidType = VoidType.NULL)
 {
-    val generator = TypeScriptGenerator(listOf(klass), mappings, classTransformers,
+    val generator = TypeScriptGenerator(listOf(T::class), mappings, classTransformers,
         ignoreSuperclasses, intTypeName = "int", voidType = voidType)
 
     val expected = expectedOutput
-        .map(TypeScriptDefinitionFactory::fromCode)
+        .map(TypeScriptDefinition.Companion::invoke)
         .toSet()
     val actual = generator.individualDefinitions
-        .map(TypeScriptDefinitionFactory::fromCode)
+        .map(TypeScriptDefinition.Companion::invoke)
         .toSet()
 
     actual.should.equal(expected)
@@ -109,16 +109,25 @@ class ClassWithEnum(val direction: Direction)
 data class DataClass(val prop: String)
 class ClassWithAny(val required: Any, val optional: Any?)
 
+sealed class SealedClassOutside
+data class SealedClassOutside1(val value: String): SealedClassOutside()
+data class SealedClassOutside2(val otherValue: Int): SealedClassOutside()
+
+sealed class SealedClass {
+    data class In1(val value: String): SealedClass()
+    data class In2(val otherValue: Int): SealedClass()
+}
+
 class Tests: Spek({
     it("handles empty class") {
-        assertGeneratedCode(Empty::class, setOf("""
+        assertGeneratedCode<Empty>(setOf("""
 interface Empty {
 }
 """))
     }
 
     it("handles classes with a single member") {
-        assertGeneratedCode(ClassWithMember::class, setOf("""
+        assertGeneratedCode<ClassWithMember>(setOf("""
 interface ClassWithMember {
     a: string;
 }
@@ -126,7 +135,7 @@ interface ClassWithMember {
     }
 
     it("handles SimpleTypes") {
-        assertGeneratedCode(SimpleTypes::class, setOf("""
+        assertGeneratedCode<SimpleTypes>(setOf("""
     interface SimpleTypes {
         aString: string;
         anInt: int;
@@ -136,7 +145,7 @@ interface ClassWithMember {
     }
 
     it("handles ClassWithLists") {
-        assertGeneratedCode(ClassWithLists::class, setOf("""
+        assertGeneratedCode<ClassWithLists>(setOf("""
     interface ClassWithLists {
         aList: string[];
         anArrayList: string[];
@@ -145,7 +154,7 @@ interface ClassWithMember {
     }
 
     it("handles ClassWithArray") {
-        assertGeneratedCode(ClassWithArray::class, setOf("""
+        assertGeneratedCode<ClassWithArray>(setOf("""
     interface ClassWithArray {
         items: string[];
     }
@@ -160,7 +169,7 @@ interface ClassWithMember {
     """
 
     it("handles ClassWithDependencies") {
-        assertGeneratedCode(ClassWithDependencies::class, setOf("""
+        assertGeneratedCode<ClassWithDependencies>(setOf("""
     interface ClassWithDependencies {
         widget: Widget;
     }
@@ -168,7 +177,7 @@ interface ClassWithMember {
     }
 
     it("handles ClassWithNullables") {
-        assertGeneratedCode(ClassWithNullables::class, setOf("""
+        assertGeneratedCode<ClassWithNullables>(setOf("""
     interface ClassWithNullables {
         widget: Widget | null;
     }
@@ -176,7 +185,7 @@ interface ClassWithMember {
     }
 
     it("handles ClassWithComplexNullables") {
-        assertGeneratedCode(ClassWithComplexNullables::class, setOf("""
+        assertGeneratedCode<ClassWithComplexNullables>(setOf("""
     interface ClassWithComplexNullables {
         maybeWidgets: (string | null)[] | null;
         maybeWidgetsArray: (string | null)[] | null;
@@ -185,7 +194,7 @@ interface ClassWithMember {
     }
 
     it("handles ClassWithNullableList") {
-        assertGeneratedCode(ClassWithNullableList::class, setOf("""
+        assertGeneratedCode<ClassWithNullableList>(setOf("""
     interface ClassWithNullableList {
         strings: string[] | null;
     }
@@ -193,7 +202,7 @@ interface ClassWithMember {
     }
 
     it("handles GenericClass") {
-        assertGeneratedCode(GenericClass::class, setOf("""
+        assertGeneratedCode<GenericClass<*,*,*>>(setOf("""
     interface GenericClass<A, B, C extends any[]> {
         a: A;
         b: (B | null)[];
@@ -203,7 +212,7 @@ interface ClassWithMember {
     }
 
     it("handles DerivedClass") {
-        assertGeneratedCode(DerivedClass::class, setOf("""
+        assertGeneratedCode<DerivedClass>(setOf("""
     interface DerivedClass extends BaseClass {
         b: string[];
     }
@@ -215,14 +224,14 @@ interface ClassWithMember {
     }
 
     it("handles ClassWithMethods") {
-        assertGeneratedCode(ClassWithMethods::class, setOf("""
+        assertGeneratedCode<ClassWithMethods>(setOf("""
     interface ClassWithMethods {
     }
     """))
     }
 
     it("handles AbstractClass") {
-        assertGeneratedCode(AbstractClass::class, setOf("""
+        assertGeneratedCode<AbstractClass>(setOf("""
     interface AbstractClass {
         concreteProperty: string;
         abstractProperty: int;
@@ -231,7 +240,7 @@ interface ClassWithMember {
     }
 
     it("handles ClassWithEnum") {
-        assertGeneratedCode(ClassWithEnum::class, setOf("""
+        assertGeneratedCode<ClassWithEnum>(setOf("""
     interface ClassWithEnum {
         direction: Direction;
     }
@@ -239,7 +248,7 @@ interface ClassWithMember {
     }
 
     it("handles DataClass") {
-        assertGeneratedCode(DataClass::class, setOf("""
+        assertGeneratedCode<DataClass>(setOf("""
     interface DataClass {
         prop: string;
     }
@@ -248,7 +257,7 @@ interface ClassWithMember {
 
     it("handles ClassWithAny") {
         // Note: in TypeScript any includes null and undefined.
-        assertGeneratedCode(ClassWithAny::class, setOf("""
+        assertGeneratedCode<ClassWithAny>(setOf("""
     interface ClassWithAny {
         required: any;
         optional: any;
@@ -257,7 +266,7 @@ interface ClassWithMember {
     }
 
     it("supports type mapping for classes") {
-        assertGeneratedCode(ClassWithDependencies::class, setOf("""
+        assertGeneratedCode<ClassWithDependencies>(setOf("""
 interface ClassWithDependencies {
     widget: CustomWidget;
 }
@@ -265,7 +274,7 @@ interface ClassWithDependencies {
     }
 
     it("supports type mapping for basic types") {
-        assertGeneratedCode(DataClass::class, setOf("""
+        assertGeneratedCode<DataClass>(setOf("""
     interface DataClass {
         prop: CustomString;
     }
@@ -273,7 +282,7 @@ interface ClassWithDependencies {
     }
 
     it("supports transforming property names") {
-        assertGeneratedCode(DataClass::class, setOf("""
+        assertGeneratedCode<DataClass>(setOf("""
     interface DataClass {
         PROP: string;
     }
@@ -294,7 +303,7 @@ interface ClassWithDependencies {
     }
 
     it("supports transforming only some classes") {
-        assertGeneratedCode(ClassWithDependencies::class, setOf("""
+        assertGeneratedCode<ClassWithDependencies>(setOf("""
 interface ClassWithDependencies {
     widget: Widget;
 }
@@ -313,7 +322,7 @@ interface Widget {
     }
 
     it("supports transforming types") {
-        assertGeneratedCode(DataClass::class, setOf("""
+        assertGeneratedCode<DataClass>(setOf("""
     interface DataClass {
         prop: int | null;
     }
@@ -331,7 +340,7 @@ interface Widget {
     }
 
     it("supports filtering properties") {
-        assertGeneratedCode(SimpleTypes::class, setOf("""
+        assertGeneratedCode<SimpleTypes>(setOf("""
     interface SimpleTypes {
         aString: string;
         aDouble: number;
@@ -346,7 +355,7 @@ interface Widget {
     }
 
     it("supports filtering subclasses") {
-        assertGeneratedCode(DerivedClass::class, setOf("""
+        assertGeneratedCode<DerivedClass>(setOf("""
     interface DerivedClass extends BaseClass {
         B: string[];
     }
@@ -364,7 +373,7 @@ interface Widget {
     }
 
     it("uses all transformers in pipeline") {
-        assertGeneratedCode(SimpleTypes::class, setOf("""
+        assertGeneratedCode<SimpleTypes>(setOf("""
     interface SimpleTypes {
         aString12: string;
         aDouble12: number;
@@ -387,7 +396,7 @@ interface Widget {
     }
 
     it("handles JavaClass") {
-        assertGeneratedCode(JavaClass::class, setOf("""
+        assertGeneratedCode<JavaClass>(setOf("""
     interface JavaClass {
         name: string;
         results: int[];
@@ -398,7 +407,7 @@ interface Widget {
     }
 
     it("handles JavaClassWithNullables") {
-        assertGeneratedCode(JavaClassWithNullables::class, setOf("""
+        assertGeneratedCode<JavaClassWithNullables>(setOf("""
     interface JavaClassWithNullables {
         name: string;
         results: int[];
@@ -408,7 +417,7 @@ interface Widget {
     }
 
     it("handles JavaClassWithNonnullAsDefault") {
-        assertGeneratedCode(JavaClassWithNonnullAsDefault::class, setOf("""
+        assertGeneratedCode<JavaClassWithNonnullAsDefault>(setOf("""
     interface JavaClassWithNonnullAsDefault {
         name: string;
         results: int[];
@@ -418,7 +427,7 @@ interface Widget {
     }
 
     it("handles JavaClassWithOptional") {
-        assertGeneratedCode(JavaClassWithOptional::class, setOf("""
+        assertGeneratedCode<JavaClassWithOptional>(setOf("""
     interface JavaClassWithOptional {
         name: string;
         surname: string | null;
@@ -447,11 +456,41 @@ interface Widget {
     }
 
     it("handles ClassWithComplexNullables when serializing as undefined") {
-        assertGeneratedCode(ClassWithComplexNullables::class, setOf("""
+        assertGeneratedCode<ClassWithComplexNullables>(setOf("""
     interface ClassWithComplexNullables {
         maybeWidgets: (string | undefined)[] | undefined;
         maybeWidgetsArray: (string | undefined)[] | undefined;
     }
     """), voidType = VoidType.UNDEFINED)
     }
+
+
+    it("handles SealedClassOutside") {
+        assertGeneratedCode<SealedClassOutside>(setOf("""
+    interface SealedClassOutside1 {
+        value: string;
+    }
+
+    interface SealedClassOutside2 {
+        otherValue: int;
+    }
+
+    type SealedClassOutside = (SealedClassOutside1 | SealedClassOutside2);
+    """), voidType = VoidType.UNDEFINED)
+    }
+
+    it("handles SealedClass") {
+        assertGeneratedCode<SealedClass>(setOf("""
+    interface In1 {
+        value: string;
+    }
+
+    interface In2 {
+        otherValue: int;
+    }
+
+    type SealedClass = (In1 | In2);
+    """), voidType = VoidType.UNDEFINED)
+    }
+
 })
