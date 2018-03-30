@@ -20,10 +20,7 @@ import java.beans.Introspector
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import kotlin.reflect.*
-import kotlin.reflect.full.createType
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.superclasses
+import kotlin.reflect.full.*
 import kotlin.reflect.jvm.javaType
 
 /**
@@ -193,9 +190,20 @@ class TypeScriptGenerator(
         };"
     }
 
+    private fun generateSealedClass(klass: KClass<*>): String {
+        return "type ${klass.simpleName} = ${klass.sealedChildren
+            .map { nestedClass ->
+                visitClass(nestedClass)
+                nestedClass.simpleName
+            }
+            .joinToString(" | ")
+        };"
+    }
+
     private fun generateInterface(klass: KClass<*>): String {
         val superclasses = klass.superclasses
             .filterNot { it in ignoredSuperclasses }
+            .filterNot { isSealedParentClass(it) }
         val extendsString = if (superclasses.isNotEmpty()) {
             " extends " + superclasses
                 .map { formatClassType(it) }
@@ -251,6 +259,8 @@ class TypeScriptGenerator(
     private fun generateDefinition(klass: KClass<*>): String {
         return if (klass.java.isEnum) {
             generateEnum(klass)
+        } else if (klass.isSealed) {
+            generateSealedClass(klass)
         } else {
             generateInterface(klass)
         }
@@ -263,3 +273,21 @@ class TypeScriptGenerator(
     val individualDefinitions: Set<String>
         get() = generatedDefinitions.toSet()
 }
+
+
+/** Returns true if the provided class is sealed or it's a (grand)child of a sealed class.
+ * Used to check whether a parent class is actually a sealed class (that will be emitted as a
+ * union type) and therefore, should not be listed as an actual supertype in TypeScript. */
+private fun isSealedParentClass(klass: KClass<*>): Boolean {
+    return klass.isSealed || klass.allSuperclasses.any { it.isSealed }
+}
+
+/** Note: This method only support sealed class children who is nested in the sealed class. */
+private val KClass<*>.sealedChildren: Collection<KClass<*>>
+    get() {
+        return if (!this.isSealed) {
+            emptyList()
+        } else {
+            this.nestedClasses.filter { it.isSubclassOf(this) }
+        }
+    }

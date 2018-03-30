@@ -109,6 +109,11 @@ class ClassWithEnum(val direction: Direction)
 data class DataClass(val prop: String)
 class ClassWithAny(val required: Any, val optional: Any?)
 
+sealed class SealedThing {
+    data class SealedThingOne(val value: String): SealedThing()
+    data class SealedThingTwo(val otherValue: Int): SealedThing()
+}
+
 class Tests: Spek({
     it("handles empty class") {
         assertGeneratedCode(Empty::class, setOf("""
@@ -454,4 +459,17 @@ interface Widget {
     }
     """), voidType = VoidType.UNDEFINED)
     }
+
+    it("handles sealed classes") {
+        assertGeneratedCode(SealedThing::class, setOf("""
+    interface SealedThingOne {
+      value: string;
+    }""", """
+    interface SealedThingTwo {
+      otherValue: int;
+    }""", """
+    type SealedThing = SealedThingOne | SealedThingTwo;
+    """), voidType = VoidType.UNDEFINED)
+    }
+
 })
