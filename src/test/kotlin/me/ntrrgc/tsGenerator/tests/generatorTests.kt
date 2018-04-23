@@ -74,6 +74,10 @@ class Widget(
 class ClassWithDependencies(
     val widget: Widget
 )
+class ClassWithMixedNullables(
+    val count: Int,
+    val time: Instant?
+)
 class ClassWithNullables(
     val widget: Widget?
 )
@@ -173,6 +177,24 @@ interface ClassWithMember {
         widget: Widget | null;
     }
     """, widget))
+    }
+
+    it("handles ClassWithMixedNullables using mapping") {
+        assertGeneratedCode(ClassWithMixedNullables::class, setOf("""
+    interface ClassWithMixedNullables {
+        count: int;
+        time: string | null;
+    }
+    """), mappings = mapOf(Instant::class to "string"))
+    }
+
+    it("handles ClassWithMixedNullables using mapping and VoidTypes") {
+        assertGeneratedCode(ClassWithMixedNullables::class, setOf("""
+    interface ClassWithMixedNullables {
+        count: int;
+        time: string | undefined;
+    }
+    """), mappings = mapOf(Instant::class to "string"), voidType = VoidType.UNDEFINED)
     }
 
     it("handles ClassWithComplexNullables") {

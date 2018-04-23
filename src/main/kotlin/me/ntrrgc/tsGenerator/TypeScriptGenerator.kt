@@ -123,7 +123,7 @@ class TypeScriptGenerator(
         if (classifier is KClass<*>) {
             val existingMapping = mappings[classifier]
             if (existingMapping != null) {
-                return TypeScriptType.single(mappings[classifier]!!, false, voidType)
+                return TypeScriptType.single(mappings[classifier]!!, kType.isMarkedNullable, voidType)
             }
         }
 
