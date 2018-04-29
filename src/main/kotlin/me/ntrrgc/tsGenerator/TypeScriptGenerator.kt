@@ -194,11 +194,11 @@ class TypeScriptGenerator(
     }
 
     private fun generateInterface(klass: KClass<*>): String {
-        val superclasses = klass.superclasses
-            .filterNot { it in ignoredSuperclasses }
-        val extendsString = if (superclasses.isNotEmpty()) {
-            " extends " + superclasses
-                .map { formatClassType(it) }
+        val supertypes = klass.supertypes
+            .filterNot { it.classifier in ignoredSuperclasses }
+        val extendsString = if (supertypes.isNotEmpty()) {
+            " extends " + supertypes
+                .map { formatKType(it).formatWithoutParenthesis() }
                 .joinToString(", ")
         } else ""
 
