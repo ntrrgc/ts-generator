@@ -37,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.ntrrgc:ts-generator:1.1.0'
+    compile 'com.github.ntrrgc:ts-generator:1.1.1'
 }
 ```
 
