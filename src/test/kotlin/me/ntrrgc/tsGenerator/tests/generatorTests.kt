@@ -24,6 +24,7 @@ import me.ntrrgc.tsGenerator.onlyOnSubclassesOf
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
 import java.beans.Introspector
+import java.time.Instant
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
