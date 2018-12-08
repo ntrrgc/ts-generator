@@ -294,6 +294,14 @@ interface ClassWithDependencies {
     """), mappings = mapOf(String::class to "CustomString"))
     }
 
+    it("supports nullable mapped types") {
+        assertGeneratedCode(ClassWithNullables::class, setOf("""
+interface ClassWithNullables {
+    widget: string | undefined;
+}
+"""), mappings = mapOf(Widget::class to "string"), voidType = VoidType.UNDEFINED)
+    }
+
     it("supports transforming property names") {
         assertGeneratedCode(DataClass::class, setOf("""
     interface DataClass {
