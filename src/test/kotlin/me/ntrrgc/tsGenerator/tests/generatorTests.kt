@@ -113,6 +113,8 @@ enum class Direction {
 class ClassWithEnum(val direction: Direction)
 data class DataClass(val prop: String)
 class ClassWithAny(val required: Any, val optional: Any?)
+class ClassWithMap(val values: Map<String, String>)
+class ClassWithEnumMap(val values: Map<Direction, String>)
 
 class Tests: Spek({
     it("handles empty class") {
@@ -476,5 +478,23 @@ interface Widget {
         maybeWidgetsArray: (string | undefined)[] | undefined;
     }
     """), voidType = VoidType.UNDEFINED)
+    }
+
+    it("transforms ClassWithMap") {
+        assertGeneratedCode(ClassWithMap::class, setOf("""
+    interface ClassWithMap {
+        values: { [key: string]: string };
+    }
+    """))
+    }
+
+    it("transforms ClassWithEnumMap") {
+        assertGeneratedCode(ClassWithEnumMap::class, setOf("""
+    type Direction = "North" | "West" | "South" | "East";
+    """, """
+    interface ClassWithEnumMap {
+        values: { [key in Direction]: string };
+    }
+    """))
     }
 })

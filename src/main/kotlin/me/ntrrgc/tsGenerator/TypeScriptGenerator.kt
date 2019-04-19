@@ -162,9 +162,13 @@ class TypeScriptGenerator(
                         "${formatKType(itemType).formatWithParenthesis()}[]"
                     } else if (classifier.isSubclassOf(Map::class)) {
                         // Use native JS associative object
-                        val keyType = formatKType(kType.arguments[0].type ?: KotlinAnyOrNull)
+                        val rawKeyType = kType.arguments[0].type ?: KotlinAnyOrNull
+                        val keyType = formatKType(rawKeyType)
                         val valueType = formatKType(kType.arguments[1].type ?: KotlinAnyOrNull)
-                        "{ [key: ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
+                        if ((rawKeyType.classifier as? KClass<*>)?.java?.isEnum == true)
+                            "{ [key in ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
+                        else
+                            "{ [key: ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
                     } else {
                         // Use class name, with or without template parameters
                         formatClassType(classifier) + if (kType.arguments.isNotEmpty()) {
