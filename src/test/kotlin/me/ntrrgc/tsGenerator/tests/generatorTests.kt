@@ -89,7 +89,7 @@ class ClassWithComplexNullables(
 class ClassWithNullableList(
     val strings: List<String>?
 )
-class GenericClass<A, out B, out C: List<Any>>(
+open class GenericClass<A, out B, out C: List<Any>>(
     val a: A,
     val b: List<B?>,
     val c: C,
@@ -97,6 +97,7 @@ class GenericClass<A, out B, out C: List<Any>>(
 )
 open class BaseClass(val a: Int)
 class DerivedClass(val b: List<String>): BaseClass(4)
+class GenericDerivedClass<B>(a: Empty, b: List<B?>, c: ArrayList<String>): GenericClass<Empty, B, ArrayList<String>>(a, b, c, a)
 class ClassWithMethods(val propertyMethod: () -> Int) {
     fun regularMethod() = 4
 }
@@ -235,6 +236,22 @@ interface ClassWithMember {
     """, """
     interface BaseClass {
         a: int;
+    }
+    """))
+    }
+
+    it("handles GenericDerivedClass") {
+        assertGeneratedCode(GenericDerivedClass::class, setOf("""
+    interface GenericClass<A, B, C extends any[]> {
+        a: A;
+        b: (B | null)[];
+        c: C;
+    }
+    ""","""
+    interface Empty {
+    }
+    ""","""
+    interface GenericDerivedClass<B> extends GenericClass<Empty, B, string[]> {
     }
     """))
     }
