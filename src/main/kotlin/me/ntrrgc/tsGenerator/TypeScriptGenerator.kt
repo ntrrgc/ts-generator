@@ -19,11 +19,15 @@ package me.ntrrgc.tsGenerator
 import java.beans.Introspector
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
-import kotlin.reflect.*
+import kotlin.reflect.KCallable
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
+import kotlin.reflect.KType
+import kotlin.reflect.KTypeParameter
+import kotlin.reflect.KVisibility
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.javaType
 
 /**
@@ -74,7 +78,7 @@ import kotlin.reflect.jvm.javaType
  * By default it's number, but can be changed to int if the TypeScript
  * version used supports it or the user wants to be extra explicit.
  */
-class TypeScriptGenerator(
+open class TypeScriptGenerator(
     rootClasses: Iterable<KClass<*>>,
     private val mappings: Map<KClass<*>, String> = mapOf(),
     classTransformers: List<ClassTransformer> = listOf(),
@@ -105,7 +109,7 @@ class TypeScriptGenerator(
         }
     }
 
-    private fun visitClass(klass: KClass<*>) {
+    protected open fun visitClass(klass: KClass<*>) {
         if (klass !in visitedClasses) {
             visitedClasses.add(klass)
 
@@ -113,7 +117,7 @@ class TypeScriptGenerator(
         }
     }
 
-    private fun formatClassType(type: KClass<*>): String {
+    protected open fun formatClassType(type: KClass<*>): String {
         visitClass(type)
         return type.simpleName!!
     }
@@ -140,8 +144,7 @@ class TypeScriptGenerator(
                 @Suppress("IfThenToElvis")
                 if (classifier is KClass<*>) {
                     if (classifier.isSubclassOf(Iterable::class)
-                        || classifier.javaObjectType.isArray)
-                    {
+                        || classifier.javaObjectType.isArray) {
                         // Use native JS array
                         // Parenthesis are needed to disambiguate complex cases,
                         // e.g. (Pair<string|null, int>|null)[]|null
@@ -173,7 +176,10 @@ class TypeScriptGenerator(
                         // Use class name, with or without template parameters
                         formatClassType(classifier) + if (kType.arguments.isNotEmpty()) {
                             "<" + kType.arguments
-                                .map { arg -> formatKType(arg.type ?: KotlinAnyOrNull).formatWithoutParenthesis() }
+                                .map { arg ->
+                                    formatKType(arg.type
+                                        ?: KotlinAnyOrNull).formatWithoutParenthesis()
+                                }
                                 .joinToString(", ") + ">"
                         } else ""
                     }
@@ -188,7 +194,7 @@ class TypeScriptGenerator(
         return TypeScriptType.single(classifierTsType, kType.isMarkedNullable, voidType)
     }
 
-    private fun generateEnum(klass: KClass<*>): String {
+    protected open fun generateEnum(klass: KClass<*>): String {
         return "type ${klass.simpleName} = ${klass.java.enumConstants
             .map { constant: Any ->
                 constant.toString().toJSString()
@@ -197,7 +203,7 @@ class TypeScriptGenerator(
         };"
     }
 
-    private fun generateInterface(klass: KClass<*>): String {
+    protected open fun generateInterface(klass: KClass<*>): String {
         val supertypes = klass.supertypes
             .filterNot { it.classifier in ignoredSuperclasses }
         val extendsString = if (supertypes.isNotEmpty()) {
@@ -246,13 +252,13 @@ class TypeScriptGenerator(
             "}"
     }
 
-    private fun isFunctionType(javaType: Type): Boolean {
+    protected open fun isFunctionType(javaType: Type): Boolean {
         return javaType is KCallable<*>
             || javaType.typeName.startsWith("kotlin.jvm.functions.")
             || (javaType is ParameterizedType && isFunctionType(javaType.rawType))
     }
 
-    private fun generateDefinition(klass: KClass<*>): String {
+    protected open fun generateDefinition(klass: KClass<*>): String {
         return if (klass.java.isEnum) {
             generateEnum(klass)
         } else {
