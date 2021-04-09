@@ -1,7 +1,5 @@
 # TypeScript definition generator for the JVM
 
-[![Java CI with Gradle](actions/workflows/gradle.yml/badge.svg)](actions/workflows/gradle.yml)
-
 This library generates TypeScript definitions that cover a set of Kotlin and Java classes using Kotlin reflection.
 
 TypeScript definitions are useful when data classes are serialized to JSON and
