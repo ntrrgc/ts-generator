@@ -65,5 +65,5 @@ dependencies {
     testCompile "org.jetbrains.spek:spek-api:$spek_version"
     testRuntime "org.jetbrains.spek:spek-junit-platform-engine:$spek_version"
     testRuntime "org.junit.platform:junit-platform-launcher:$junit_version"
-    testCompile "com.google.code.findbugs:jsr305:3.0.1"
+    testCompile "com.google.code.findbugs:jsr305:3.0.2"
 }
