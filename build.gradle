@@ -42,7 +42,6 @@ junitPlatform {
 apply plugin: 'kotlin'
 
 repositories {
-    maven { url "https://dl.bintray.com/jetbrains/spek" }
     mavenCentral()
 }
 
@@ -51,8 +50,8 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     testCompile 'com.winterbe:expekt:0.5.0'
-    testCompile 'org.jetbrains.spek:spek-api:1.1.0-beta3'
+    testCompile 'org.jetbrains.spek:spek-api:1.1.0'
     testRuntime 'org.junit.platform:junit-platform-launcher:1.0.0-M3'
-    testRuntime 'org.jetbrains.spek:spek-junit-platform-engine:1.1.0-beta3'
+    testRuntime 'org.jetbrains.spek:spek-junit-platform-engine:1.1.0'
     testCompile 'com.google.code.findbugs:jsr305:3.0.1'
 }
