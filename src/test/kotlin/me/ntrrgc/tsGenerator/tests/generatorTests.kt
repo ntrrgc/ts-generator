@@ -65,6 +65,7 @@ class ClassWithLists(
     val aList: List<String>,
     val anArrayList: ArrayList<String>
 )
+
 class ClassWithArray(
     val items: Array<String>
 )
@@ -88,6 +89,15 @@ class ClassWithComplexNullables(
 )
 class ClassWithNullableList(
     val strings: List<String>?
+)
+class ClassWithSet(
+    val aSet: Set<String>
+)
+class ClassWithSetMap(
+    val aSetMap: Set<Map<String,String>>
+)
+class ClassWithMapSet(
+    val aMapSet: Map<String,Set<String>>
 )
 open class GenericClass<A, out B, out C: List<Any>>(
     val a: A,
@@ -294,6 +304,30 @@ interface ClassWithMember {
     interface ClassWithAny {
         required: any;
         optional: any;
+    }
+    """))
+    }
+
+    it("handles ClassWithSet") {
+        assertGeneratedCode(ClassWithSet::class, setOf("""
+    interface ClassWithSet {
+        aSet: Set<string>;
+    }
+    """))
+    }
+
+    it("handles ClassWithSetMap") {
+        assertGeneratedCode(ClassWithSetMap::class, setOf("""
+    interface ClassWithSetMap {
+        aSetMap: Set<{ [key: string]: string }>;
+    }
+    """))
+    }
+
+    it("handles ClassWithMapSet") {
+        assertGeneratedCode(ClassWithMapSet::class, setOf("""
+    interface ClassWithMapSet {
+        aMapSet: { [key: string]: Set<string> };
     }
     """))
     }

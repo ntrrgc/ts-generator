@@ -126,7 +126,6 @@ class TypeScriptGenerator(
                 return TypeScriptType.single(mappings[classifier]!!, kType.isMarkedNullable, voidType)
             }
         }
-
         val classifierTsType = when (classifier) {
             Boolean::class -> "boolean"
             String::class, Char::class -> "string"
@@ -139,7 +138,14 @@ class TypeScriptGenerator(
             else -> {
                 @Suppress("IfThenToElvis")
                 if (classifier is KClass<*>) {
-                    if (classifier.isSubclassOf(Iterable::class)
+                    if (classifier.isSubclassOf(Set::class)) {
+                        // Use native JS associative object
+                        val rawKeyType = kType.arguments[0].type ?: KotlinAnyOrNull
+                        val keyType = formatKType(rawKeyType)
+                        println("keyTypeSet $keyType")
+                        "Set<${keyType.formatWithoutParenthesis()}>"
+                    }
+                    else if (classifier.isSubclassOf(Iterable::class)
                         || classifier.javaObjectType.isArray)
                     {
                         // Use native JS array
@@ -165,7 +171,9 @@ class TypeScriptGenerator(
                         val rawKeyType = kType.arguments[0].type ?: KotlinAnyOrNull
                         val keyType = formatKType(rawKeyType)
                         val valueType = formatKType(kType.arguments[1].type ?: KotlinAnyOrNull)
+                        println("classifier $classifier, Ktype $kType, rawKeyType $rawKeyType, keyType $keyType, valueType $valueType" )
                         if ((rawKeyType.classifier as? KClass<*>)?.java?.isEnum == true)
+
                             "{ [key in ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
                         else
                             "{ [key: ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
@@ -184,7 +192,6 @@ class TypeScriptGenerator(
                 }
             }
         }
-
         return TypeScriptType.single(classifierTsType, kType.isMarkedNullable, voidType)
     }
 
