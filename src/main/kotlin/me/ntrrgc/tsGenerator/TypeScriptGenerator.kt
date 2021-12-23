@@ -23,7 +23,6 @@ import kotlin.reflect.*
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.javaType
 
 /**
@@ -266,4 +265,8 @@ class TypeScriptGenerator(
 
     val individualDefinitions: Set<String>
         get() = generatedDefinitions.toSet()
+
+    fun formatType(kType: KType): String {
+        return formatKType(kType).formatWithoutParenthesis()
+    }
 }
