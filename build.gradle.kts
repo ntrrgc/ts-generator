@@ -23,7 +23,7 @@ plugins {
 }
 
 project.group = "me.ntrrgc"
-project.version = "1.1.3"
+project.version = "1.2.0"
 
 val spekVersion = "1.1.5"
 val junitVersion = "5.8.2"
