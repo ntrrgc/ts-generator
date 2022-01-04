@@ -26,7 +26,7 @@ import kotlin.reflect.KType
  * For each method the return value of the first transformer
  * to return not null is used.
  */
-internal class ClassTransformerPipeline(val memberTransformers: List<ClassTransformer>): ClassTransformer {
+internal class ClassTransformerPipeline(private val memberTransformers: List<ClassTransformer>): ClassTransformer {
 
     override fun transformPropertyList(properties: List<KProperty<*>>, klass: KClass<*>): List<KProperty<*>> {
         var ret = properties

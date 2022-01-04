@@ -23,8 +23,7 @@ import kotlin.reflect.KType
 /**
  * A TypeScript generator class transformer.
  *
- * Allows to customize how class properties are transformed from
- * Kotlin to TypeScript.
+ * Allows customising how class properties are transformed from Kotlin to TypeScript.
  */
 interface ClassTransformer {
 

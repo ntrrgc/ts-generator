@@ -23,7 +23,7 @@ class ClassDefinition(tsCode: String): Comparable<ClassDefinition>, TypeScriptDe
 
     val members = lines
         .subList(1, this.lines.size - 1)
-        .map { "    " + it }
+        .map { "    $it" }
         .toSet()
 
     override fun equals(other: Any?): Boolean {
@@ -48,12 +48,12 @@ class ClassDefinition(tsCode: String): Comparable<ClassDefinition>, TypeScriptDe
      * if it's greater than [other].
      */
     override fun compareTo(other: ClassDefinition): Int {
-        if (this == other) {
-            return 0
+        return if (this == other) {
+            0
         } else if (this.lines.first() < other.lines.first()) {
-            return -1
+            -1
         } else {
-            return 1
+            1
         }
     }
 

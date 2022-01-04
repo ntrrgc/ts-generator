@@ -37,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.ntrrgc:ts-generator:1.1.1'
+    implementation 'com.github.ntrrgc:ts-generator:1.1.1'
 }
 ```
 
@@ -485,7 +485,7 @@ Imagine in our previous example we don't want to emit `achievement_ref` with typ
 
 We can use a combination of `transformPropertyName()` and `transformPropertyType()` for this purpose:
 
-```typescript
+```kotlin
 fun main(args: Array<String>) {
     println(TypeScriptGenerator(
         rootClasses = setOf(
@@ -498,10 +498,10 @@ fun main(args: Array<String>) {
                     property: KProperty<*>, 
                     klass: KClass<*>
                 ): String {
-                    if (propertyName == "achievementRef") {
-                        return "achievement"
+                  return if (propertyName == "achievementRef") {
+                        "achievement"
                     } else {
-                        return propertyName
+                        propertyName
                     }
                 }
 
@@ -514,10 +514,10 @@ fun main(args: Array<String>) {
                     // (unless replaced in transformPropertyList()), so
                     // it maintains the original property name declared
                     // in the code.
-                    if (property.name == "achievementRef") {
-                        return Achievement::class.createType(nullable = false)
+                    return if (property.name == "achievementRef") {
+                        Achievement::class.createType(nullable = false)
                     } else {
-                        return type
+                        type
                     }
                 }
             }
@@ -614,11 +614,11 @@ object : ClassTransformer {
             .find { it.name == property.name }
 
         val getterReturnType = bean?.readMethod?.kotlinFunction?.returnType
-        if (getterReturnType?.classifier == Optional::class) {
+      return if (getterReturnType?.classifier == Optional::class) {
             val wrappedType = getterReturnType.arguments.first().type!!
-            return wrappedType.withNullability(true)
+            wrappedType.withNullability(true)
         } else {
-            return type
+            type
         }
     }
 }
@@ -642,7 +642,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-   http://www.apache.org/licenses/LICENSE-2.0
+   https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,

@@ -329,7 +329,7 @@ interface ClassWithDependencies {
                  * in the pipeline is used.
                  */
                 override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
-                    return propertyName.toUpperCase()
+                    return propertyName.uppercase()
                 }
             }
         ))
@@ -348,7 +348,7 @@ interface Widget {
 """), classTransformers = listOf(
             object : ClassTransformer {
                 override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
-                    return propertyName.toUpperCase()
+                    return propertyName.uppercase()
                 }
             }.onlyOnSubclassesOf(Widget::class)
         ))
@@ -362,10 +362,10 @@ interface Widget {
     """), classTransformers = listOf(
             object : ClassTransformer {
                 override fun transformPropertyType(type: KType, property: KProperty<*>, klass: KClass<*>): KType {
-                    if (klass == DataClass::class && property.name == "prop") {
-                        return Int::class.createType(nullable = true)
+                    return if (klass == DataClass::class && property.name == "prop") {
+                        Int::class.createType(nullable = true)
                     } else {
-                        return type
+                        type
                     }
                 }
             }
@@ -399,7 +399,7 @@ interface Widget {
     """), classTransformers = listOf(
             object : ClassTransformer {
                 override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
-                    return propertyName.toUpperCase()
+                    return propertyName.uppercase()
                 }
             }.onlyOnSubclassesOf(BaseClass::class)
         ))
@@ -477,11 +477,11 @@ interface Widget {
                         .find { it.name == property.name }
 
                     val getterReturnType = bean?.readMethod?.kotlinFunction?.returnType
-                    if (getterReturnType?.classifier == Optional::class) {
+                    return if (getterReturnType?.classifier == Optional::class) {
                         val wrappedType = getterReturnType.arguments.first().type!!
-                        return wrappedType.withNullability(true)
+                        wrappedType.withNullability(true)
                     } else {
-                        return type
+                        type
                     }
                 }
             }

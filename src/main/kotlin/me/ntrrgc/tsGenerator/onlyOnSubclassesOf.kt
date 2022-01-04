@@ -20,5 +20,5 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
 fun ClassTransformer.onlyOnSubclassesOf(klass: KClass<*>): FilteredClassTransformer {
-    return FilteredClassTransformer(this, { it.isSubclassOf(klass) })
+    return FilteredClassTransformer(this) { it.isSubclassOf(klass) }
 }

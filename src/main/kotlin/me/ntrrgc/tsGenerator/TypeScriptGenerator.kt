@@ -23,7 +23,6 @@ import kotlin.reflect.*
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.javaType
 
 /**
@@ -172,9 +171,11 @@ class TypeScriptGenerator(
                     } else {
                         // Use class name, with or without template parameters
                         formatClassType(classifier) + if (kType.arguments.isNotEmpty()) {
-                            "<" + kType.arguments
-                                .map { arg -> formatKType(arg.type ?: KotlinAnyOrNull).formatWithoutParenthesis() }
-                                .joinToString(", ") + ">"
+                            "<" + kType.arguments.joinToString(", ") { arg ->
+                                formatKType(
+                                    arg.type ?: KotlinAnyOrNull
+                                ).formatWithoutParenthesis()
+                            } + ">"
                         } else ""
                     }
                 } else if (classifier is KTypeParameter) {
@@ -189,11 +190,11 @@ class TypeScriptGenerator(
     }
 
     private fun generateEnum(klass: KClass<*>): String {
-        return "type ${klass.simpleName} = ${klass.java.enumConstants
-            .map { constant: Any ->
-                constant.toString().toJSString()
-            }
-            .joinToString(" | ")
+        return "type ${klass.simpleName} = ${
+            klass.java.enumConstants
+                .joinToString(" | ") { constant: Any ->
+                    constant.toString().toJSString()
+                }
         };"
     }
 
@@ -202,26 +203,23 @@ class TypeScriptGenerator(
             .filterNot { it.classifier in ignoredSuperclasses }
         val extendsString = if (supertypes.isNotEmpty()) {
             " extends " + supertypes
-                .map { formatKType(it).formatWithoutParenthesis() }
-                .joinToString(", ")
+                .joinToString(", ") {
+                    formatKType(it).formatWithoutParenthesis()
+                }
         } else ""
 
         val templateParameters = if (klass.typeParameters.isNotEmpty()) {
-            "<" + klass.typeParameters
-                .map { typeParameter ->
-                    val bounds = typeParameter.upperBounds
-                        .filter { it.classifier != Any::class }
-                    typeParameter.name + if (bounds.isNotEmpty()) {
-                        " extends " + bounds
-                            .map { bound ->
-                                formatKType(bound).formatWithoutParenthesis()
-                            }
-                            .joinToString(" & ")
-                    } else {
-                        ""
+            "<" + klass.typeParameters.joinToString(", ") { typeParameter ->
+                val bounds = typeParameter.upperBounds
+                    .filter { it.classifier != Any::class }
+                typeParameter.name + if (bounds.isNotEmpty()) {
+                    " extends " + bounds.joinToString(" & ") { bound ->
+                        formatKType(bound).formatWithoutParenthesis()
                     }
+                } else {
+                    ""
                 }
-                .joinToString(", ") + ">"
+            } + ">"
         } else {
             ""
         }
@@ -234,15 +232,15 @@ class TypeScriptGenerator(
                 }
                 .let { propertyList ->
                     pipeline.transformPropertyList(propertyList, klass)
-                }
-                .map { property ->
-                    val propertyName = pipeline.transformPropertyName(property.name, property, klass)
-                    val propertyType = pipeline.transformPropertyType(property.returnType, property, klass)
+                }.joinToString("") { property ->
+                    val propertyName =
+                        pipeline.transformPropertyName(property.name, property, klass)
+                    val propertyType =
+                        pipeline.transformPropertyType(property.returnType, property, klass)
 
                     val formattedPropertyType = formatKType(propertyType).formatWithoutParenthesis()
                     "    $propertyName: $formattedPropertyType;\n"
-                }
-                .joinToString("") +
+                } +
             "}"
     }
 
