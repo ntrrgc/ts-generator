@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 /*
  * Copyright 2017 Alicia Boya García
  *
@@ -14,56 +16,64 @@
  * limitations under the License.
  */
 
-group 'me.ntrrgc'
-version '1.1.3'
+plugins {
+  kotlin("jvm") version "1.6.10"
 
-buildscript {
-    ext.kotlin_version = '1.4.31'
-    ext.spek_version = '1.1.5'
-    ext.junit_version = '1.7.1'
-
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.2.0'
-    }
+  jacoco
 }
 
-apply plugin: 'org.junit.platform.gradle.plugin'
+project.group = "me.ntrrgc"
+project.version = "1.1.3"
 
-junitPlatform {
-    filters {
-        engines {
-            include 'spek'
-        }
-    }
-}
-
-apply plugin: 'kotlin'
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives sourcesJar
-}
-
-repositories {
-    maven { url "https://dl.bintray.com/jetbrains/spek" }
-    mavenCentral()
-}
+val spekVersion = "1.1.5"
+val junitVersion = "5.8.2"
+val expektVersion = "0.5.0"
+val googleFindBugsVersion = "3.0.2"
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+  implementation(kotlin("reflect"))
 
-    testCompile "com.winterbe:expekt:0.5.0"
-    testCompile "org.jetbrains.spek:spek-api:$spek_version"
-    testRuntime "org.jetbrains.spek:spek-junit-platform-engine:$spek_version"
-    testRuntime "org.junit.platform:junit-platform-launcher:$junit_version"
-    testCompile "com.google.code.findbugs:jsr305:3.0.1"
+  testImplementation(platform("org.junit:junit-bom:$junitVersion"))
+  testImplementation("org.junit.jupiter:junit-jupiter")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher") {
+    because("Only needed to run tests in a version of IntelliJ IDEA that bundles older versions")
+  }
+
+  testImplementation("com.winterbe:expekt:$expektVersion")
+  testImplementation("org.jetbrains.spek:spek-api:$spekVersion")
+  testImplementation("org.jetbrains.spek:spek-junit-platform-engine:$spekVersion")
+
+  testImplementation("com.google.code.findbugs:jsr305:$googleFindBugsVersion")
+}
+
+java {
+  withSourcesJar()
+}
+
+kotlin {
+  jvmToolchain {
+    (this as JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(8))
+  }
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+  kotlinOptions {
+    jvmTarget = "1.8"
+    apiVersion = "1.6"
+    languageVersion = "1.6"
+  }
+}
+
+tasks.withType<Test> {
+  useJUnitPlatform {
+    includeEngines("spek")
+  }
+}
+tasks.test {
+  finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.wrapper {
+  gradleVersion = "7.3.3"
+  distributionType = Wrapper.DistributionType.ALL
 }
