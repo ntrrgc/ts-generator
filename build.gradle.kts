@@ -19,11 +19,22 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   kotlin("jvm") version "1.6.10"
 
+  id("me.qoomon.git-versioning") version "5.1.2"
+
   jacoco
 }
 
 project.group = "me.ntrrgc"
-project.version = "1.2.0"
+project.version = "0.0.0-SNAPSHOT"
+gitVersioning.apply {
+  refs {
+    branch(".+") { version = "\${ref}-SNAPSHOT" }
+    tag("v(?<version>.*)") { version = "\${ref.version}" }
+  }
+
+  // optional fallback configuration in case of no matching ref configuration
+  rev { version = "\${commit}" }
+}
 
 val spekVersion = "1.1.5"
 val junitVersion = "5.8.2"
