@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 /*
  * Copyright 2017 Alicia Boya García
  *
@@ -15,10 +13,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.6.10"
+    `java-library`
 
+    `maven-publish`
     id("me.qoomon.git-versioning") version "5.1.2"
 
     jacoco
@@ -56,6 +57,7 @@ dependencies {
 }
 
 java {
+    withJavadocJar()
     withSourcesJar()
 }
 
@@ -85,4 +87,12 @@ tasks.test {
 tasks.wrapper {
     gradleVersion = "7.3.3"
     distributionType = Wrapper.DistributionType.ALL
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }
