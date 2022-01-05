@@ -20,30 +20,43 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 
-class FilteredClassTransformer(val wrappedTransformer: ClassTransformer,
-                               val filter: (klass: KClass<*>) -> Boolean): ClassTransformer {
+class FilteredClassTransformer(
+    private val wrappedTransformer: ClassTransformer,
+    val filter: (klass: KClass<*>) -> Boolean
+) : ClassTransformer {
 
-    override fun transformPropertyList(properties: List<KProperty<*>>, klass: KClass<*>): List<KProperty<*>> {
-        if (filter(klass)) {
-            return wrappedTransformer.transformPropertyList(properties, klass)
+    override fun transformPropertyList(
+        properties: List<KProperty<*>>,
+        klass: KClass<*>
+    ): List<KProperty<*>> {
+        return if (filter(klass)) {
+            wrappedTransformer.transformPropertyList(properties, klass)
         } else {
-            return properties
+            properties
         }
     }
 
-    override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
-        if (filter(klass)) {
-            return wrappedTransformer.transformPropertyName(propertyName, property, klass)
+    override fun transformPropertyName(
+        propertyName: String,
+        property: KProperty<*>,
+        klass: KClass<*>
+    ): String {
+        return if (filter(klass)) {
+            wrappedTransformer.transformPropertyName(propertyName, property, klass)
         } else {
-            return propertyName
+            propertyName
         }
     }
 
-    override fun transformPropertyType(type: KType, property: KProperty<*>, klass: KClass<*>): KType {
-        if (filter(klass)) {
-            return wrappedTransformer.transformPropertyType(type, property, klass)
+    override fun transformPropertyType(
+        type: KType,
+        property: KProperty<*>,
+        klass: KClass<*>
+    ): KType {
+        return if (filter(klass)) {
+            wrappedTransformer.transformPropertyType(type, property, klass)
         } else {
-            return type
+            type
         }
     }
 }

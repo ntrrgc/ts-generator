@@ -19,11 +19,15 @@ package me.ntrrgc.tsGenerator
 import java.beans.Introspector
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
-import kotlin.reflect.*
+import kotlin.reflect.KCallable
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
+import kotlin.reflect.KType
+import kotlin.reflect.KTypeParameter
+import kotlin.reflect.KVisibility
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.javaType
 
 /**
@@ -123,58 +127,57 @@ class TypeScriptGenerator(
         if (classifier is KClass<*>) {
             val existingMapping = mappings[classifier]
             if (existingMapping != null) {
-                return TypeScriptType.single(mappings[classifier]!!, kType.isMarkedNullable, voidType)
+                return TypeScriptType.single(
+                    mappings[classifier]!!,
+                    kType.isMarkedNullable,
+                    voidType
+                )
             }
         }
 
         val classifierTsType = when (classifier) {
-            Boolean::class -> "boolean"
-            String::class, Char::class -> "string"
+            Boolean::class              -> "boolean"
+            String::class, Char::class  -> "string"
             Int::class,
             Long::class,
             Short::class,
-            Byte::class -> intTypeName
+            Byte::class                 -> intTypeName
             Float::class, Double::class -> "number"
-            Any::class -> "any"
-            else -> {
-                @Suppress("IfThenToElvis")
+            Any::class                  -> "any"
+            else                        -> {
+
                 if (classifier is KClass<*>) {
-                    if (classifier.isSubclassOf(Iterable::class)
-                        || classifier.javaObjectType.isArray)
-                    {
+                    if (
+                        classifier.isSubclassOf(Iterable::class) || classifier.javaObjectType.isArray
+                    ) {
                         // Use native JS array
                         // Parenthesis are needed to disambiguate complex cases,
                         // e.g. (Pair<string|null, int>|null)[]|null
                         val itemType = when (kType.classifier) {
                             // Native Java arrays... unfortunately simple array types like these
                             // are not mapped automatically into kotlin.Array<T> by kotlin-reflect :(
-                            IntArray::class -> Int::class.createType(nullable = false)
-                            ShortArray::class -> Short::class.createType(nullable = false)
-                            ByteArray::class -> Byte::class.createType(nullable = false)
-                            CharArray::class -> Char::class.createType(nullable = false)
-                            LongArray::class -> Long::class.createType(nullable = false)
-                            FloatArray::class -> Float::class.createType(nullable = false)
+                            IntArray::class    -> Int::class.createType(nullable = false)
+                            ShortArray::class  -> Short::class.createType(nullable = false)
+                            ByteArray::class   -> Byte::class.createType(nullable = false)
+                            CharArray::class   -> Char::class.createType(nullable = false)
+                            LongArray::class   -> Long::class.createType(nullable = false)
+                            FloatArray::class  -> Float::class.createType(nullable = false)
                             DoubleArray::class -> Double::class.createType(nullable = false)
 
                             // Class container types (they use generics)
-                            else -> kType.arguments.single().type ?: KotlinAnyOrNull
+                            else               -> kType.arguments.single().type ?: KotlinAnyOrNull
                         }
                         "${formatKType(itemType).formatWithParenthesis()}[]"
                     } else if (classifier.isSubclassOf(Map::class)) {
-                        // Use native JS associative object
-                        val rawKeyType = kType.arguments[0].type ?: KotlinAnyOrNull
-                        val keyType = formatKType(rawKeyType)
-                        val valueType = formatKType(kType.arguments[1].type ?: KotlinAnyOrNull)
-                        if ((rawKeyType.classifier as? KClass<*>)?.java?.isEnum == true)
-                            "{ [key in ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
-                        else
-                            "{ [key: ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
+                        classifyMapCollection(kType)
                     } else {
                         // Use class name, with or without template parameters
                         formatClassType(classifier) + if (kType.arguments.isNotEmpty()) {
-                            "<" + kType.arguments
-                                .map { arg -> formatKType(arg.type ?: KotlinAnyOrNull).formatWithoutParenthesis() }
-                                .joinToString(", ") + ">"
+                            "<" + kType.arguments.joinToString(", ") { arg ->
+                                formatKType(
+                                    arg.type ?: KotlinAnyOrNull
+                                ).formatWithoutParenthesis()
+                            } + ">"
                         } else ""
                     }
                 } else if (classifier is KTypeParameter) {
@@ -188,12 +191,38 @@ class TypeScriptGenerator(
         return TypeScriptType.single(classifierTsType, kType.isMarkedNullable, voidType)
     }
 
+    /**
+     * Handle a [Map].
+     *
+     * If the key is a TypeScript `string`, `number` or `type` (enum),
+     * use a native JS associative object.
+     *
+     * Else, use an ES6 `Map<K, V>`.
+     */
+    private fun classifyMapCollection(kType: KType): String {
+
+        val rawKeyType = kType.arguments[0].type ?: KotlinAnyOrNull
+        val keyType = formatKType(rawKeyType)
+        val valueType = formatKType(kType.arguments[1].type ?: KotlinAnyOrNull)
+
+        val isKeyEnum = (rawKeyType.classifier as? KClass<*>)?.java?.isEnum == true
+
+        return when {
+            isKeyEnum                                    ->
+                "{ [key in ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
+            keyType.isValidIndexSignatureParameterType() ->
+                "{ [key: ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
+            else                                         ->
+                "Map<${keyType.formatWithoutParenthesis()}, ${valueType.formatWithoutParenthesis()}>"
+        }
+    }
+
     private fun generateEnum(klass: KClass<*>): String {
-        return "type ${klass.simpleName} = ${klass.java.enumConstants
-            .map { constant: Any ->
-                constant.toString().toJSString()
-            }
-            .joinToString(" | ")
+        return "type ${klass.simpleName} = ${
+            klass.java.enumConstants
+                .joinToString(" | ") { constant: Any ->
+                    constant.toString().toJSString()
+                }
         };"
     }
 
@@ -202,26 +231,23 @@ class TypeScriptGenerator(
             .filterNot { it.classifier in ignoredSuperclasses }
         val extendsString = if (supertypes.isNotEmpty()) {
             " extends " + supertypes
-                .map { formatKType(it).formatWithoutParenthesis() }
-                .joinToString(", ")
+                .joinToString(", ") {
+                    formatKType(it).formatWithoutParenthesis()
+                }
         } else ""
 
         val templateParameters = if (klass.typeParameters.isNotEmpty()) {
-            "<" + klass.typeParameters
-                .map { typeParameter ->
-                    val bounds = typeParameter.upperBounds
-                        .filter { it.classifier != Any::class }
-                    typeParameter.name + if (bounds.isNotEmpty()) {
-                        " extends " + bounds
-                            .map { bound ->
-                                formatKType(bound).formatWithoutParenthesis()
-                            }
-                            .joinToString(" & ")
-                    } else {
-                        ""
+            "<" + klass.typeParameters.joinToString(", ") { typeParameter ->
+                val bounds = typeParameter.upperBounds
+                    .filter { it.classifier != Any::class }
+                typeParameter.name + if (bounds.isNotEmpty()) {
+                    " extends " + bounds.joinToString(" & ") { bound ->
+                        formatKType(bound).formatWithoutParenthesis()
                     }
+                } else {
+                    ""
                 }
-                .joinToString(", ") + ">"
+            } + ">"
         } else {
             ""
         }
@@ -234,15 +260,15 @@ class TypeScriptGenerator(
                 }
                 .let { propertyList ->
                     pipeline.transformPropertyList(propertyList, klass)
-                }
-                .map { property ->
-                    val propertyName = pipeline.transformPropertyName(property.name, property, klass)
-                    val propertyType = pipeline.transformPropertyType(property.returnType, property, klass)
+                }.joinToString("") { property ->
+                    val propertyName =
+                        pipeline.transformPropertyName(property.name, property, klass)
+                    val propertyType =
+                        pipeline.transformPropertyType(property.returnType, property, klass)
 
                     val formattedPropertyType = formatKType(propertyType).formatWithoutParenthesis()
                     "    $propertyName: $formattedPropertyType;\n"
-                }
-                .joinToString("") +
+                } +
             "}"
     }
 

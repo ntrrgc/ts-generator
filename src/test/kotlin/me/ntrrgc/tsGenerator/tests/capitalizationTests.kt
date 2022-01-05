@@ -16,14 +16,15 @@
 
 package me.ntrrgc.tsGenerator.tests
 
-import com.winterbe.expekt.should
 import me.ntrrgc.tsGenerator.camelCaseToSnakeCase
 import me.ntrrgc.tsGenerator.snakeCaseToCamelCase
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.describe
-import org.jetbrains.spek.api.dsl.it
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.spekframework.spek2.Spek
+import org.spekframework.spek2.style.specification.describe
 
-class CapitalizationTests: Spek({
+
+class CapitalizationTests : Spek({
+
     describe("camelCaseToSnakeCase()") {
         val tests: List<Pair<String, String>> = listOf(
             "camelCase" to "camel_case",
@@ -39,13 +40,14 @@ class CapitalizationTests: Spek({
 
         tests.forEach { (camel, snake) ->
             it("handles $camel -> $snake") {
-                camelCaseToSnakeCase(camel).should.equal(snake)
+                val actual = camelCaseToSnakeCase(snake)
+                assertEquals(snake, actual)
             }
         }
     }
 
     describe("snakeCaseToCamelCase()") {
-        val tests: List<Pair<String, String>> = listOf(
+        listOf(
             "camel_case" to "camelCase",
             "camel_camel_case" to "camelCamelCase",
             "camel2_camel2_case" to "camel2Camel2Case",
@@ -54,11 +56,11 @@ class CapitalizationTests: Spek({
             "http_response_code" to "httpResponseCode",
             "http_response_code_xyz" to "httpResponseCodeXyz"
         )
-
-        tests.forEach { (snake, camel) ->
-            it("handles $snake -> $camel") {
-                snakeCaseToCamelCase(snake).should.equal(camel)
+            .forEach { (snake, camel) ->
+                it("handles $snake -> $camel") {
+                    val actual = snakeCaseToCamelCase(snake)
+                    assertEquals(camel, actual)
+                }
             }
-        }
     }
 })

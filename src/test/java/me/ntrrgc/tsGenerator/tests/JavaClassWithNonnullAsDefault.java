@@ -22,6 +22,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
 public class JavaClassWithNonnullAsDefault {
+
     private String name;
 
     private int[] results;

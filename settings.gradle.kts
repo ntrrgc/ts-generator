@@ -14,16 +14,27 @@
  * limitations under the License.
  */
 
-package me.ntrrgc.tsGenerator
+rootProject.name = "ts-generator"
 
-internal fun <T, R> Iterable<T>.firstNotNull(cb: (value: T) -> R?): R? {
-    this.forEach { value ->
-        val ret = cb(value)
-        if (ret != null) {
-            return ret
-        }
+
+@Suppress("UnstableApiUsage") // centralised repository definitions are incubating
+dependencyResolutionManagement {
+
+    repositories {
+        mavenCentral()
+        jitpack()
+        gradlePluginPortal()
     }
 
-    // Reached end of collection with no matches
-    return null
+    pluginManagement {
+        repositories {
+            gradlePluginPortal()
+            mavenCentral()
+            jitpack()
+        }
+    }
+}
+
+fun RepositoryHandler.jitpack() {
+    maven("https://jitpack.io")
 }

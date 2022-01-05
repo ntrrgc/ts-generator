@@ -16,18 +16,21 @@
 
 package me.ntrrgc.tsGenerator.tests
 
-class ClassDefinition(tsCode: String): Comparable<ClassDefinition>, TypeScriptDefinition {
-    val lines = tsCode.trim()
+class ClassDefinitionComparator(
+    tsCode: String
+) : Comparable<ClassDefinitionComparator>, TypeScriptDefinition {
+
+    private val lines = tsCode.trim()
         .split("\n")
         .map(String::trim)
 
-    val members = lines
+    private val members = lines
         .subList(1, this.lines.size - 1)
-        .map { "    " + it }
+        .map { "    $it" }
         .toSet()
 
     override fun equals(other: Any?): Boolean {
-        if (other !is ClassDefinition) {
+        if (other !is ClassDefinitionComparator) {
             return false
         }
 
@@ -47,13 +50,13 @@ class ClassDefinition(tsCode: String): Comparable<ClassDefinition>, TypeScriptDe
      * to the specified [other] object, a negative number if it's less than [other], or a positive number
      * if it's greater than [other].
      */
-    override fun compareTo(other: ClassDefinition): Int {
-        if (this == other) {
-            return 0
+    override fun compareTo(other: ClassDefinitionComparator): Int {
+        return if (this == other) {
+            0
         } else if (this.lines.first() < other.lines.first()) {
-            return -1
+            -1
         } else {
-            return 1
+            1
         }
     }
 

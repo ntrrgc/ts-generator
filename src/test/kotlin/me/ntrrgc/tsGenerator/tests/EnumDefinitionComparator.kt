@@ -14,5 +14,22 @@
  * limitations under the License.
  */
 
-rootProject.name = 'ts-generator'
+package me.ntrrgc.tsGenerator.tests
 
+class EnumDefinitionComparator(val code: String) : TypeScriptDefinition {
+    override fun toString(): String {
+        return code
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is EnumDefinitionComparator) {
+            return false
+        }
+
+        return this.code == other.code
+    }
+
+    override fun hashCode(): Int {
+        return code.hashCode()
+    }
+}

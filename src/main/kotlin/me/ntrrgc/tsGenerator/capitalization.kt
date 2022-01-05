@@ -26,9 +26,9 @@ fun parseCamelCase(name: String): List<String> {
 fun camelCaseToSnakeCase(name: String): String {
     // Adapted from http://stackoverflow.com/a/1176023/1777162
     return name
-        .replace(Regex("(.)([A-Z][a-z]+)"), { "${it.groupValues[1]}_${it.groupValues[2]}" })
-        .replace(Regex("([a-z0-9])([A-Z])"), { "${it.groupValues[1]}_${it.groupValues[2]}"})
-        .toLowerCase()
+        .replace(Regex("(.)([A-Z][a-z]+)")) { "${it.groupValues[1]}_${it.groupValues[2]}" }
+        .replace(Regex("([a-z0-9])([A-Z])")) { "${it.groupValues[1]}_${it.groupValues[2]}" }
+        .lowercase()
 }
 
 fun snakeCaseToCamelCase(name: String): String {
@@ -37,7 +37,7 @@ fun snakeCaseToCamelCase(name: String): String {
             if (i == 0) {
                 s
             } else {
-                s[0].toUpperCase() + s.substring(1)
+                s[0].uppercaseChar() + s.substring(1)
             }
         }
         .joinToString("")

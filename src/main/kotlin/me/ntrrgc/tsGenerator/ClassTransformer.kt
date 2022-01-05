@@ -23,8 +23,7 @@ import kotlin.reflect.KType
 /**
  * A TypeScript generator class transformer.
  *
- * Allows to customize how class properties are transformed from
- * Kotlin to TypeScript.
+ * Allows customising how class properties are transformed from Kotlin to TypeScript.
  */
 interface ClassTransformer {
 
@@ -39,7 +38,10 @@ interface ClassTransformer {
      * by default the public, non-function properties are chosen.
      * @param klass Class the properties come from.
      */
-    fun transformPropertyList(properties: List<KProperty<*>>, klass: KClass<*>): List<KProperty<*>> {
+    fun transformPropertyList(
+        properties: List<KProperty<*>>,
+        klass: KClass<*>
+    ): List<KProperty<*>> {
         return properties
     }
 
@@ -56,7 +58,11 @@ interface ClassTransformer {
      * @param property The actual property of the class.
      * @param klass Class the property comes from.
      */
-    fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
+    fun transformPropertyName(
+        propertyName: String,
+        property: KProperty<*>,
+        klass: KClass<*>
+    ): String {
         return propertyName
     }
 
