@@ -61,6 +61,59 @@ class TestCollectionFields : Spek({
                 )
             )
         }
+
+        it("transforms ClassWithNullableEnumMap") {
+            assertGeneratedCode(
+                ClassWithNullableEnumMap::class,
+                setOf(
+                    """
+                    type Direction = "North" | "West" | "South" | "East";
+                    """,
+                    """
+                    interface ClassWithNullableEnumMap {
+                        values: { [key in Direction | null]: string };
+                    }
+                    """,
+                )
+            )
+        }
+
+        it("transforms ClassWithMapWithObjectKey") {
+            assertGeneratedCode(
+                ClassWithMapWithObjectKey::class,
+                setOf(
+                    """
+                    interface MapKey {
+                        i: int;
+                        s: string;
+                    }
+                    """,
+                    """
+                    interface ClassWithMapWithObjectKey {
+                        values: Map<MapKey, string>;
+                    }
+                    """,
+                )
+            )
+        }
+        it("transforms ClassWithMapWithNullableObjectKey") {
+            assertGeneratedCode(
+                ClassWithMapWithNullableObjectKey::class,
+                setOf(
+                    """
+                    interface MapKey {
+                        i: int;
+                        s: string;
+                    }
+                    """,
+                    """
+                    interface ClassWithMapWithNullableObjectKey {
+                        values: Map<MapKey | null, string>;
+                    }
+                    """,
+                )
+            )
+        }
     }
 
 }) {
@@ -85,6 +138,13 @@ class TestCollectionFields : Spek({
         }
 
         class ClassWithEnumMap(val values: Map<Direction, String>)
+
+        class ClassWithNullableEnumMap(val values: Map<Direction?, String>)
+
+
+        class MapKey(val i: Int, val s: String)
+        class ClassWithMapWithObjectKey(val values: Map<MapKey, String>)
+        class ClassWithMapWithNullableObjectKey(val values: Map<MapKey?, String>)
 
 
     }

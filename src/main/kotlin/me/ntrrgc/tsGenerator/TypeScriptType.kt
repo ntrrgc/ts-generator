@@ -56,4 +56,15 @@ internal class TypeScriptType private constructor(private val types: List<String
     fun formatWithoutParenthesis(): String {
         return types.joinToString(" | ")
     }
+
+    /**
+     * > An index signature parameter type must be 'string', 'number', 'symbol', or a
+     * template literal type.
+     */
+    fun isValidIndexSignatureParameterType(): Boolean {
+        return when (formatWithoutParenthesis()) {
+            "string", "number" -> true
+            else               -> false
+        }
+    }
 }

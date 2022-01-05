@@ -145,10 +145,10 @@ class TypeScriptGenerator(
             Float::class, Double::class -> "number"
             Any::class                  -> "any"
             else                        -> {
-                @Suppress("IfThenToElvis")
+
                 if (classifier is KClass<*>) {
-                    if (classifier.isSubclassOf(Iterable::class)
-                        || classifier.javaObjectType.isArray
+                    if (
+                        classifier.isSubclassOf(Iterable::class) || classifier.javaObjectType.isArray
                     ) {
                         // Use native JS array
                         // Parenthesis are needed to disambiguate complex cases,
@@ -169,14 +169,7 @@ class TypeScriptGenerator(
                         }
                         "${formatKType(itemType).formatWithParenthesis()}[]"
                     } else if (classifier.isSubclassOf(Map::class)) {
-                        // Use native JS associative object
-                        val rawKeyType = kType.arguments[0].type ?: KotlinAnyOrNull
-                        val keyType = formatKType(rawKeyType)
-                        val valueType = formatKType(kType.arguments[1].type ?: KotlinAnyOrNull)
-                        if ((rawKeyType.classifier as? KClass<*>)?.java?.isEnum == true)
-                            "{ [key in ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
-                        else
-                            "{ [key: ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
+                        classifyMapCollection(kType)
                     } else {
                         // Use class name, with or without template parameters
                         formatClassType(classifier) + if (kType.arguments.isNotEmpty()) {
@@ -196,6 +189,32 @@ class TypeScriptGenerator(
         }
 
         return TypeScriptType.single(classifierTsType, kType.isMarkedNullable, voidType)
+    }
+
+    /**
+     * Handle a [Map].
+     *
+     * If the key is a TypeScript `string`, `number` or `type` (enum),
+     * use a native JS associative object.
+     *
+     * Else, use an ES6 `Map<K, V>`.
+     */
+    private fun classifyMapCollection(kType: KType): String {
+
+        val rawKeyType = kType.arguments[0].type ?: KotlinAnyOrNull
+        val keyType = formatKType(rawKeyType)
+        val valueType = formatKType(kType.arguments[1].type ?: KotlinAnyOrNull)
+
+        val isKeyEnum = (rawKeyType.classifier as? KClass<*>)?.java?.isEnum == true
+
+        return when {
+            isKeyEnum                                    ->
+                "{ [key in ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
+            keyType.isValidIndexSignatureParameterType() ->
+                "{ [key: ${keyType.formatWithoutParenthesis()}]: ${valueType.formatWithoutParenthesis()} }"
+            else                                         ->
+                "Map<${keyType.formatWithoutParenthesis()}, ${valueType.formatWithoutParenthesis()}>"
+        }
     }
 
     private fun generateEnum(klass: KClass<*>): String {
