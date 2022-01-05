@@ -16,13 +16,13 @@
 
 package me.ntrrgc.tsGenerator.tests
 
-class EnumDefinition(val code: String) : TypeScriptDefinition {
+class EnumDefinitionComparator(val code: String) : TypeScriptDefinition {
     override fun toString(): String {
         return code
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other !is EnumDefinition) {
+        if (other !is EnumDefinitionComparator) {
             return false
         }
 

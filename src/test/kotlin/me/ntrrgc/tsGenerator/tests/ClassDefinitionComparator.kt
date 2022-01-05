@@ -16,7 +16,7 @@
 
 package me.ntrrgc.tsGenerator.tests
 
-class ClassDefinition(tsCode: String) : Comparable<ClassDefinition>, TypeScriptDefinition {
+class ClassDefinitionComparator(tsCode: String) : Comparable<ClassDefinitionComparator>, TypeScriptDefinition {
     val lines = tsCode.trim()
         .split("\n")
         .map(String::trim)
@@ -27,7 +27,7 @@ class ClassDefinition(tsCode: String) : Comparable<ClassDefinition>, TypeScriptD
         .toSet()
 
     override fun equals(other: Any?): Boolean {
-        if (other !is ClassDefinition) {
+        if (other !is ClassDefinitionComparator) {
             return false
         }
 
@@ -47,7 +47,7 @@ class ClassDefinition(tsCode: String) : Comparable<ClassDefinition>, TypeScriptD
      * to the specified [other] object, a negative number if it's less than [other], or a positive number
      * if it's greater than [other].
      */
-    override fun compareTo(other: ClassDefinition): Int {
+    override fun compareTo(other: ClassDefinitionComparator): Int {
         return if (this == other) {
             0
         } else if (this.lines.first() < other.lines.first()) {

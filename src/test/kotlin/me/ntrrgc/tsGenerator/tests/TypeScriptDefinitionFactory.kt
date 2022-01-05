@@ -21,9 +21,9 @@ object TypeScriptDefinitionFactory {
         val code = tsCode.trim()
 
         return if (code.startsWith("interface")) {
-            ClassDefinition(code)
+            ClassDefinitionComparator(code)
         } else if (code.startsWith("type")) {
-            EnumDefinition(code)
+            EnumDefinitionComparator(code)
         } else {
             throw RuntimeException("Unknown definition type: $code")
         }
