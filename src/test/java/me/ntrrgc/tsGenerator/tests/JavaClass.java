@@ -17,6 +17,7 @@
 package me.ntrrgc.tsGenerator.tests;
 
 public class JavaClass {
+
     private String name;
     private int[] results;
     private boolean finished;

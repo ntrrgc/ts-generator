@@ -22,9 +22,13 @@ import kotlin.reflect.KType
 
 class FilteredClassTransformer(
     private val wrappedTransformer: ClassTransformer,
-                               val filter: (klass: KClass<*>) -> Boolean): ClassTransformer {
+    val filter: (klass: KClass<*>) -> Boolean
+) : ClassTransformer {
 
-    override fun transformPropertyList(properties: List<KProperty<*>>, klass: KClass<*>): List<KProperty<*>> {
+    override fun transformPropertyList(
+        properties: List<KProperty<*>>,
+        klass: KClass<*>
+    ): List<KProperty<*>> {
         return if (filter(klass)) {
             wrappedTransformer.transformPropertyList(properties, klass)
         } else {
@@ -32,7 +36,11 @@ class FilteredClassTransformer(
         }
     }
 
-    override fun transformPropertyName(propertyName: String, property: KProperty<*>, klass: KClass<*>): String {
+    override fun transformPropertyName(
+        propertyName: String,
+        property: KProperty<*>,
+        klass: KClass<*>
+    ): String {
         return if (filter(klass)) {
             wrappedTransformer.transformPropertyName(propertyName, property, klass)
         } else {
@@ -40,7 +48,11 @@ class FilteredClassTransformer(
         }
     }
 
-    override fun transformPropertyType(type: KType, property: KProperty<*>, klass: KClass<*>): KType {
+    override fun transformPropertyType(
+        type: KType,
+        property: KProperty<*>,
+        klass: KClass<*>
+    ): KType {
         return if (filter(klass)) {
             wrappedTransformer.transformPropertyType(type, property, klass)
         } else {

@@ -20,6 +20,7 @@ package me.ntrrgc.tsGenerator.tests;
 import java.util.Optional;
 
 public class JavaClassWithOptional {
+
     private String name;
     private String surname;
 

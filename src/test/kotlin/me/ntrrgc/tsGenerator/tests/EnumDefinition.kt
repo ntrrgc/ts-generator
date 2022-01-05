@@ -16,7 +16,7 @@
 
 package me.ntrrgc.tsGenerator.tests
 
-class EnumDefinition(val code: String): TypeScriptDefinition {
+class EnumDefinition(val code: String) : TypeScriptDefinition {
     override fun toString(): String {
         return code
     }

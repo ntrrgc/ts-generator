@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class JavaClassWithNullables {
+
     @Nonnull
     private String name;
 
@@ -30,7 +31,8 @@ public class JavaClassWithNullables {
     @Nullable
     private int[] nextResults;
 
-    JavaClassWithNullables(@Nonnull String name, @Nonnull int[] results, @Nullable int[] nextResults) {
+    JavaClassWithNullables(@Nonnull String name, @Nonnull int[] results,
+        @Nullable int[] nextResults) {
         this.name = name;
         this.results = results;
         this.nextResults = nextResults;

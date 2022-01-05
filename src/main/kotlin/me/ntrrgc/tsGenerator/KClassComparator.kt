@@ -23,7 +23,7 @@ import kotlin.reflect.full.isSubclassOf
  * Used to sort classes so that more specific instances are
  * "less" than more generic ones.
  */
-class KClassComparator: Comparator<KClass<*>> {
+class KClassComparator : Comparator<KClass<*>> {
     override fun compare(o1: KClass<*>, o2: KClass<*>): Int {
         return if (o1.isSubclassOf(o2) && o2.isSubclassOf(o1)) {
             0 // same class

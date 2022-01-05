@@ -36,11 +36,13 @@ internal class TypeScriptType private constructor(private val types: List<String
     infix fun or(other: TypeScriptType): TypeScriptType {
         val combinedTypes = (this.types + other.types).distinct()
 
-        return TypeScriptType(if ("any" in combinedTypes) {
-            listOf("any")
-        } else {
-            combinedTypes
-        })
+        return TypeScriptType(
+            if ("any" in combinedTypes) {
+                listOf("any")
+            } else {
+                combinedTypes
+            }
+        )
     }
 
     fun formatWithParenthesis(): String {

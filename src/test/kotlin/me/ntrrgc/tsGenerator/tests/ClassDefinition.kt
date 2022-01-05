@@ -16,7 +16,7 @@
 
 package me.ntrrgc.tsGenerator.tests
 
-class ClassDefinition(tsCode: String): Comparable<ClassDefinition>, TypeScriptDefinition {
+class ClassDefinition(tsCode: String) : Comparable<ClassDefinition>, TypeScriptDefinition {
     val lines = tsCode.trim()
         .split("\n")
         .map(String::trim)

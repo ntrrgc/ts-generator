@@ -1,35 +1,41 @@
 # TypeScript definition generator for the JVM
 
-This library generates TypeScript definitions that cover a set of Kotlin and Java classes using Kotlin reflection.
+This library generates TypeScript definitions that cover a set of Kotlin and Java classes using
+Kotlin reflection.
 
-TypeScript definitions are useful when data classes are serialized to JSON and
-handled in a JavaScript or TypeScript web frontend as they enable context-aware type checking and autocompletion in a number of IDEs and editors.
+TypeScript definitions are useful when data classes are serialized to JSON and handled in a
+JavaScript or TypeScript web frontend as they enable context-aware type checking and autocompletion
+in a number of IDEs and editors.
 
 ts-generator supports:
- * Primitive types, with or without explicit int.
- * Kotlin and Java classes.
- * Data classes.
- * Enums.
- * Any type.
- * Generic classes, without type erasure.
- * Generic constraints.
- * Class inheritance.
- * Abstract classes.
- * Lists as JS arrays.
- * Maps as JS objects.
- * Null safety, even inside composite types.
- * Java beans.
- * Mapping types.
- * Nullability annotations, when allowed by the retention policy.
- * Customizing class definitions via transformers.
- * Parenthesis optimization: They are placed only when they are needed to disambiguate.
- * Emitting either `null` or `undefined` for JVM nullable types.
- 
+
+* Primitive types, with or without explicit int.
+* Kotlin and Java classes.
+* Data classes.
+* Enums.
+* Any type.
+* Generic classes, without type erasure.
+* Generic constraints.
+* Class inheritance.
+* Abstract classes.
+* Lists as JS arrays.
+* Maps as JS objects.
+* Null safety, even inside composite types.
+* Java beans.
+* Mapping types.
+* Nullability annotations, when allowed by the retention policy.
+* Customizing class definitions via transformers.
+* Parenthesis optimization: They are placed only when they are needed to disambiguate.
+* Emitting either `null` or `undefined` for JVM nullable types.
+
 ## Installation
 
-ts-generator requires Kotlin 1.1. Kotlin 1.0 is not compatible as its reflection library is not powerful enough to do this transformation. 
+ts-generator requires Kotlin 1.1. Kotlin 1.0 is not compatible as its reflection library is not
+powerful enough to do this transformation.
 
-Then you need to include this library in your project. The easiest way is to [download it from JitPack](https://jitpack.io/#ntrrgc/ts-generator). For instance, in Gradle you would add this to `build.gradle`:
+Then you need to include this library in your project. The easiest way is
+to [download it from JitPack](https://jitpack.io/#ntrrgc/ts-generator). For instance, in Gradle you
+would add this to `build.gradle`:
 
 ```groovy
 repositories {
@@ -146,11 +152,15 @@ interface Player {
 ```
 
 Then you can paste it into a `.d.ts` file and declare it in your environment, e.g:
- 
- * TypeScript: Just add the file to your project.
- * JS with Visual Studio Code: Create a `jsconfig.json` in Visual Code and adding it in the `include` section of `typeAcquisition`. [You can read more about type adquisition in the VS Code documentation.](https://code.visualstudio.com/Docs/languages/javascript#_automatic-type-acquisition)
- * IntelliJ/WebStorm/PHPStorm: Open the Settings and look for *Libraries* inside *JavaScript*. Click *Add* and create a new library declaration adding the created definition file. [Read more about it in the documentation](https://www.jetbrains.com/help/idea/2016.3/configuring-javascript-libraries.html)
-  
+
+* TypeScript: Just add the file to your project.
+* JS with Visual Studio Code: Create a `jsconfig.json` in Visual Code and adding it in the `include`
+  section of `typeAcquisition`
+  . [You can read more about type adquisition in the VS Code documentation.](https://code.visualstudio.com/Docs/languages/javascript#_automatic-type-acquisition)
+* IntelliJ/WebStorm/PHPStorm: Open the Settings and look for *Libraries* inside *JavaScript*.
+  Click *Add* and create a new library declaration adding the created definition
+  file. [Read more about it in the documentation](https://www.jetbrains.com/help/idea/2016.3/configuring-javascript-libraries.html)
+
 ![](vscode_screenshot.png)
 
 ## Advanced features
@@ -159,24 +169,28 @@ This generator can handle more complex data types. Some examples are shown below
 
 ### Mapping types
 
-Sometimes you want to map certain Kotlin or Java classes to native JS types, like `Date`. 
+Sometimes you want to map certain Kotlin or Java classes to native JS types, like `Date`.
 
-This can be done with the `mappings` argument of `TypeScriptGenerator`, as show in the first example. 
+This can be done with the `mappings` argument of `TypeScriptGenerator`, as show in the first
+example.
 
-Note the types mapped with this feature are emitted as they were written without any further processing. This is intended to support native JS types not defined in the Kotlin or Java backend.
+Note the types mapped with this feature are emitted as they were written without any further
+processing. This is intended to support native JS types not defined in the Kotlin or Java backend.
 
 ### Int type
 
-Currently TypeScript only supports one number type: `number`. 
+Currently TypeScript only supports one number type: `number`.
 
-This may change if [a proposal for int types](https://github.com/Microsoft/TypeScript/issues/4639) succeeds. Also, some people may want to be extra explicit and do:
+This may change if [a proposal for int types](https://github.com/Microsoft/TypeScript/issues/4639)
+succeeds. Also, some people may want to be extra explicit and do:
 
 ```typescript
 type int = number;
 ```
 
-In order to be able to document if a type may or may not be integer. In any case, you can instruct `TypeScriptGenerator` to use explicit `int` with the `intTypeName` parameter. For instance:
- 
+In order to be able to document if a type may or may not be integer. In any case, you can
+instruct `TypeScriptGenerator` to use explicit `int` with the `intTypeName` parameter. For instance:
+
 ```kotlin
 fun main(args: Array<String>) {
     println(TypeScriptGenerator(
@@ -225,17 +239,19 @@ interface DerivedClass extends BaseClass {
 }
 ```
 
-By default `Serializable` and `Comparable` interfaces are not emitted. You can filter out more interfaces or classes by using the `ignoreSuperclasses` parameter of the `TypeScriptGenerator` constructor.
+By default `Serializable` and `Comparable` interfaces are not emitted. You can filter out more
+interfaces or classes by using the `ignoreSuperclasses` parameter of the `TypeScriptGenerator`
+constructor.
 
 ### Generics
 
 ```kotlin
 class ContrivedExample<A, out B, out C: List<Any>>(
-    private val a: A, 
-    val b: B, 
+    private val a: A,
+    val b: B,
     val c: C,
     val listOfPairs: List<Pair<Int, B>>)
-    
+
 fun main(args: Array<String>) {
     println(TypeScriptGenerator(
         rootClasses = setOf(
@@ -307,13 +323,14 @@ public class JavaClass {
     public boolean isFinished() { return finished; }
 
     public char[][] getMultidimensional() { return multidimensional; }
-    public void setMultidimensional(char[][] multidimensional) { 
-        this.multidimensional = multidimensional; 
+    public void setMultidimensional(char[][] multidimensional) {
+        this.multidimensional = multidimensional;
     }
 }
 ```
 
-Even though its fields are private, they are accessible through getter methods. The generator knows this, so they are included in the definition:
+Even though its fields are private, they are accessible through getter methods. The generator knows
+this, so they are included in the definition:
 
 ```typescript
 interface JavaClass {
@@ -328,11 +345,18 @@ interface JavaClass {
 
 Kotlin was designed with null-safety in mind, but the Java land is not so green.
 
-In Java all types are nullable by default, so the programmer needs some way to annotate which may and which will never be null. There are many ways to do this, each with its own set of drawbacks.
+In Java all types are nullable by default, so the programmer needs some way to annotate which may
+and which will never be null. There are many ways to do this, each with its own set of drawbacks.
 
-The TypeScript generator makes no effort by itself to infer the nullability of Java types. Nevertheless kotlin-reflect is capable of decoding it if the classes are annotated with JSR305 annotations (`javax.annotation.*`). If no annotations are found, the types are assumed to be not null.
+The TypeScript generator makes no effort by itself to infer the nullability of Java types.
+Nevertheless kotlin-reflect is capable of decoding it if the classes are annotated with JSR305
+annotations (`javax.annotation.*`). If no annotations are found, the types are assumed to be not
+null.
 
-Note that `org.jetbrains.annotations.*` and `android.support.annotation.*` **cannot** work for this purpose, as they don't have [runtime retention](https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/Retention.html) and therefore are stripped by the compiler without leaving a way to read them through reflection.
+Note that `org.jetbrains.annotations.*` and `android.support.annotation.*` **cannot** work for this
+purpose, as they don't
+have [runtime retention](https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/Retention.html)
+and therefore are stripped by the compiler without leaving a way to read them through reflection.
 
 The following an example of a class with supported annotations:
 
@@ -351,7 +375,7 @@ public class JavaClassWithNonnullAsDefault {
     private int[] nextResults;
 
     JavaClassWithNonnullAsDefault(
-        int[] results, 
+        int[] results,
         @Nullable int[] nextResults)
     {
         this.results = results;
@@ -381,13 +405,17 @@ interface JavaClassWithNonnullAsDefault {
 
 ### Transformers
 
-Sometimes they objects you use in TypeScript or JavaScript are not exactly the same you use in your backend, but have some differences, for instance:
+Sometimes they objects you use in TypeScript or JavaScript are not exactly the same you use in your
+backend, but have some differences, for instance:
 
 * You may transform one type into another.
-* Your classes may use camelCase in the backend but being turned into snake_case in the frontend by the JSON serializer.
+* Your classes may use camelCase in the backend but being turned into snake_case in the frontend by
+  the JSON serializer.
 * Some properties of some classes may be not be sent to the frontend.
 
-To support cases like these, `TypeScriptGenerator` supports class transformers. They are objects implementing the `ClassTransformer` interface, arranged in a pipeline. They can be used to customize the list of properties of a class and their name and type.
+To support cases like these, `TypeScriptGenerator` supports class transformers. They are objects
+implementing the `ClassTransformer` interface, arranged in a pipeline. They can be used to customize
+the list of properties of a class and their name and type.
 
 Below are some examples:
 
@@ -481,9 +509,11 @@ interface AchievementCompletionState {
 
 #### Replacing types for some properties
 
-Imagine in our previous example we don't want to emit `achievement_ref` with type `string`, but rather `achievement`, with type `Achievement`. 
+Imagine in our previous example we don't want to emit `achievement_ref` with type `string`, but
+rather `achievement`, with type `Achievement`.
 
-We can use a combination of `transformPropertyName()` and `transformPropertyType()` for this purpose:
+We can use a combination of `transformPropertyName()` and `transformPropertyType()` for this
+purpose:
 
 ```kotlin
 fun main(args: Array<String>) {
@@ -494,8 +524,8 @@ fun main(args: Array<String>) {
         classTransformers = listOf(
             object : ClassTransformer {
                 override fun transformPropertyName(
-                    propertyName: String, 
-                    property: KProperty<*>, 
+                    propertyName: String,
+                    property: KProperty<*>,
                     klass: KClass<*>
                 ): String {
                   return if (propertyName == "achievementRef") {
@@ -506,8 +536,8 @@ fun main(args: Array<String>) {
                 }
 
                 override fun transformPropertyType(
-                    type: KType, 
-                    property: KProperty<*>, 
+                    type: KType,
+                    property: KProperty<*>,
                     klass: KClass<*>
                 ): KType {
                     // Note: property is the actual property from the class
@@ -542,12 +572,16 @@ interface AchievementCompletionState {
 }
 ```
 
-Note how `Achievement` class is emitted recursively after the transformation has taken place, even though it was not declared in the original `AchievementCompletionState` class nor specified in `rootClasses`.
+Note how `Achievement` class is emitted recursively after the transformation has taken place, even
+though it was not declared in the original `AchievementCompletionState` class nor specified
+in `rootClasses`.
 
 ### Applying transformers only to some classes
 
-Transformers are applied to all classes by default. If you want your transformers to apply only to classes matching a certain predicate, you can wrap them in an instance of `FilteredClassTransformer`. This is its definition:
- 
+Transformers are applied to all classes by default. If you want your transformers to apply only to
+classes matching a certain predicate, you can wrap them in an instance of `FilteredClassTransformer`
+. This is its definition:
+
  ```kotlin
 class FilteredClassTransformer(
     val wrappedTransformer: ClassTransformer,
@@ -555,38 +589,43 @@ class FilteredClassTransformer(
 ): ClassTransformer
 ```
 
-For the common case of applying a transformer only on a class and its subclasses if any, an extension method is provided, `.onlyOnSubclassesOf()`:
- 
+For the common case of applying a transformer only on a class and its subclasses if any, an
+extension method is provided, `.onlyOnSubclassesOf()`:
+
 ```kotlin
 fun main(args: Array<String>) {
-    println(TypeScriptGenerator(
-        rootClasses = setOf(
-            Achievement::class
-        ),
-        classTransformers = listOf(
-            object : ClassTransformer {
-                override fun transformPropertyList(
-                    properties: List<KProperty<*>>,
-                    klass: KClass<*>
-                ): List<KProperty<*>> {
-                    return properties.filter { property ->
-                        property.name != "ref"
+    println(
+        TypeScriptGenerator(
+            rootClasses = setOf(
+                Achievement::class
+            ),
+            classTransformers = listOf(
+                object : ClassTransformer {
+                    override fun transformPropertyList(
+                        properties: List<KProperty<*>>,
+                        klass: KClass<*>
+                    ): List<KProperty<*>> {
+                        return properties.filter { property ->
+                            property.name != "ref"
+                        }
                     }
-                }
-            }.onlyOnSubclassesOf(Achievement::class)
-        )
-    ).definitionsText)
+                }.onlyOnSubclassesOf(Achievement::class)
+            )
+        ).definitionsText
+    )
 }
 ```
 
 ### Optional\<T\> unwrapping
 
-This is an example of a more complex transformer that can be used to unwrap `Optional<T>` into `T | null`.
+This is an example of a more complex transformer that can be used to unwrap `Optional<T>`
+into `T | null`.
 
 Let's suppose a Java class like this:
 
 ```java
 public class JavaClassWithOptional {
+
     private String name;
     private String surname;
 
@@ -614,7 +653,7 @@ object : ClassTransformer {
             .find { it.name == property.name }
 
         val getterReturnType = bean?.readMethod?.kotlinFunction?.returnType
-      return if (getterReturnType?.classifier == Optional::class) {
+        return if (getterReturnType?.classifier == Optional::class) {
             val wrappedType = getterReturnType.arguments.first().type!!
             wrappedType.withNullability(true)
         } else {

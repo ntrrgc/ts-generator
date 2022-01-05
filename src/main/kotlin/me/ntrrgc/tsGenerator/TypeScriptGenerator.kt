@@ -19,7 +19,12 @@ package me.ntrrgc.tsGenerator
 import java.beans.Introspector
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
-import kotlin.reflect.*
+import kotlin.reflect.KCallable
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
+import kotlin.reflect.KType
+import kotlin.reflect.KTypeParameter
+import kotlin.reflect.KVisibility
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
@@ -122,41 +127,45 @@ class TypeScriptGenerator(
         if (classifier is KClass<*>) {
             val existingMapping = mappings[classifier]
             if (existingMapping != null) {
-                return TypeScriptType.single(mappings[classifier]!!, kType.isMarkedNullable, voidType)
+                return TypeScriptType.single(
+                    mappings[classifier]!!,
+                    kType.isMarkedNullable,
+                    voidType
+                )
             }
         }
 
         val classifierTsType = when (classifier) {
-            Boolean::class -> "boolean"
-            String::class, Char::class -> "string"
+            Boolean::class              -> "boolean"
+            String::class, Char::class  -> "string"
             Int::class,
             Long::class,
             Short::class,
-            Byte::class -> intTypeName
+            Byte::class                 -> intTypeName
             Float::class, Double::class -> "number"
-            Any::class -> "any"
-            else -> {
+            Any::class                  -> "any"
+            else                        -> {
                 @Suppress("IfThenToElvis")
                 if (classifier is KClass<*>) {
                     if (classifier.isSubclassOf(Iterable::class)
-                        || classifier.javaObjectType.isArray)
-                    {
+                        || classifier.javaObjectType.isArray
+                    ) {
                         // Use native JS array
                         // Parenthesis are needed to disambiguate complex cases,
                         // e.g. (Pair<string|null, int>|null)[]|null
                         val itemType = when (kType.classifier) {
                             // Native Java arrays... unfortunately simple array types like these
                             // are not mapped automatically into kotlin.Array<T> by kotlin-reflect :(
-                            IntArray::class -> Int::class.createType(nullable = false)
-                            ShortArray::class -> Short::class.createType(nullable = false)
-                            ByteArray::class -> Byte::class.createType(nullable = false)
-                            CharArray::class -> Char::class.createType(nullable = false)
-                            LongArray::class -> Long::class.createType(nullable = false)
-                            FloatArray::class -> Float::class.createType(nullable = false)
+                            IntArray::class    -> Int::class.createType(nullable = false)
+                            ShortArray::class  -> Short::class.createType(nullable = false)
+                            ByteArray::class   -> Byte::class.createType(nullable = false)
+                            CharArray::class   -> Char::class.createType(nullable = false)
+                            LongArray::class   -> Long::class.createType(nullable = false)
+                            FloatArray::class  -> Float::class.createType(nullable = false)
                             DoubleArray::class -> Double::class.createType(nullable = false)
 
                             // Class container types (they use generics)
-                            else -> kType.arguments.single().type ?: KotlinAnyOrNull
+                            else               -> kType.arguments.single().type ?: KotlinAnyOrNull
                         }
                         "${formatKType(itemType).formatWithParenthesis()}[]"
                     } else if (classifier.isSubclassOf(Map::class)) {
