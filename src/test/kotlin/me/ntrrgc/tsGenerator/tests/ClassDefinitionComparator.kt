@@ -16,12 +16,15 @@
 
 package me.ntrrgc.tsGenerator.tests
 
-class ClassDefinitionComparator(tsCode: String) : Comparable<ClassDefinitionComparator>, TypeScriptDefinition {
-    val lines = tsCode.trim()
+class ClassDefinitionComparator(
+    tsCode: String
+) : Comparable<ClassDefinitionComparator>, TypeScriptDefinition {
+
+    private val lines = tsCode.trim()
         .split("\n")
         .map(String::trim)
 
-    val members = lines
+    private val members = lines
         .subList(1, this.lines.size - 1)
         .map { "    $it" }
         .toSet()

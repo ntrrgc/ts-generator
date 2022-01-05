@@ -31,8 +31,12 @@ fun assertGeneratedCode(
     voidType: VoidType = VoidType.NULL
 ) {
     val generator = TypeScriptGenerator(
-        listOf(klass), mappings, classTransformers,
-        ignoreSuperclasses, intTypeName = "int", voidType = voidType
+        listOf(klass),
+        mappings,
+        classTransformers,
+        ignoreSuperclasses,
+        intTypeName = "int",
+        voidType = voidType
     )
 
     val expected = expectedOutput
