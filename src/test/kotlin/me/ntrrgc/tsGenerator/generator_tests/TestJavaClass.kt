@@ -13,89 +13,92 @@ import me.ntrrgc.tsGenerator.tests.JavaClassWithNonnullAsDefault
 import me.ntrrgc.tsGenerator.tests.JavaClassWithNullables
 import me.ntrrgc.tsGenerator.tests.JavaClassWithOptional
 import me.ntrrgc.tsGenerator.tests.assertGeneratedCode
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.it
+import org.spekframework.spek2.Spek
+import org.spekframework.spek2.style.specification.describe
 
 class TestJavaClass : Spek({
 
-    it("handles JavaClass") {
-        assertGeneratedCode(
-            JavaClass::class,
-            setOf(
-                """
-                interface JavaClass {
-                    name: string;
-                    results: int[];
-                    multidimensional: string[][];
-                    finished: boolean;
-                }
-                """
+    describe("expect Java classes are converted") {
+
+        it("handles JavaClass") {
+            assertGeneratedCode(
+                JavaClass::class,
+                setOf(
+                    """
+                    interface JavaClass {
+                        name: string;
+                        results: int[];
+                        multidimensional: string[][];
+                        finished: boolean;
+                    }
+                    """
+                )
             )
-        )
-    }
+        }
 
-    it("handles JavaClassWithNullables") {
-        assertGeneratedCode(
-            JavaClassWithNullables::class,
-            setOf(
-                """
-                interface JavaClassWithNullables {
-                    name: string;
-                    results: int[];
-                    nextResults: int[] | null;
-                }
-                """
+        it("handles JavaClassWithNullables") {
+            assertGeneratedCode(
+                JavaClassWithNullables::class,
+                setOf(
+                    """
+                    interface JavaClassWithNullables {
+                        name: string;
+                        results: int[];
+                        nextResults: int[] | null;
+                    }
+                    """
+                )
             )
-        )
-    }
+        }
 
-    it("handles JavaClassWithNonnullAsDefault") {
-        assertGeneratedCode(
-            JavaClassWithNonnullAsDefault::class,
-            setOf(
-                """
-                interface JavaClassWithNonnullAsDefault {
-                    name: string;
-                    results: int[];
-                    nextResults: int[] | null;
-                }
-                """
+        it("handles JavaClassWithNonnullAsDefault") {
+            assertGeneratedCode(
+                JavaClassWithNonnullAsDefault::class,
+                setOf(
+                    """
+                    interface JavaClassWithNonnullAsDefault {
+                        name: string;
+                        results: int[];
+                        nextResults: int[] | null;
+                    }
+                    """
+                )
             )
-        )
-    }
+        }
 
-    it("handles JavaClassWithOptional") {
-        assertGeneratedCode(
-            JavaClassWithOptional::class,
-            setOf(
-                """
-                interface JavaClassWithOptional {
-                    name: string;
-                    surname: string | null;
-                }
-                """
-            ), classTransformers = listOf(
-                object : ClassTransformer {
-                    override fun transformPropertyType(
-                        type: KType,
-                        property: KProperty<*>,
-                        klass: KClass<*>
-                    ): KType {
-                        val bean = Introspector.getBeanInfo(klass.java)
-                            .propertyDescriptors
-                            .find { it.name == property.name }
+        it("handles JavaClassWithOptional") {
+            assertGeneratedCode(
+                JavaClassWithOptional::class,
+                setOf(
+                    """
+                    interface JavaClassWithOptional {
+                        name: string;
+                        surname: string | null;
+                    }
+                    """
+                ), classTransformers = listOf(
+                    object : ClassTransformer {
+                        override fun transformPropertyType(
+                            type: KType,
+                            property: KProperty<*>,
+                            klass: KClass<*>
+                        ): KType {
+                            val bean = Introspector.getBeanInfo(klass.java)
+                                .propertyDescriptors
+                                .find { it.name == property.name }
 
-                        val getterReturnType = bean?.readMethod?.kotlinFunction?.returnType
-                        return if (getterReturnType?.classifier == Optional::class) {
-                            val wrappedType = getterReturnType.arguments.first().type!!
-                            wrappedType.withNullability(true)
-                        } else {
-                            type
+                            val getterReturnType = bean?.readMethod?.kotlinFunction?.returnType
+                            return if (getterReturnType?.classifier == Optional::class) {
+                                val wrappedType = getterReturnType.arguments.first().type!!
+                                wrappedType.withNullability(true)
+                            } else {
+                                type
+                            }
                         }
                     }
-                }
-            ))
-    }
+                ))
+        }
 
+    }
 
 })

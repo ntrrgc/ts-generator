@@ -1,66 +1,67 @@
 package me.ntrrgc.tsGenerator.generator_tests
 
 import me.ntrrgc.tsGenerator.tests.assertGeneratedCode
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.it
+import org.spekframework.spek2.Spek
+import org.spekframework.spek2.style.specification.describe
 
 class TestEmptyClass : Spek({
+    describe("expect classes with no fields are converted") {
+        val expectedGeneratedEmpty =
+            """
+            interface Empty {
+            }
+            """
 
-    val expectedGeneratedEmpty =
-        """
-        interface Empty {
+        it("handles empty class") {
+            assertGeneratedCode(
+                Empty::class,
+                setOf(
+                    expectedGeneratedEmpty
+                )
+            )
         }
-        """.trimIndent()
 
-    it("handles empty class") {
-        assertGeneratedCode(
-            Empty::class,
-            setOf(
-                expectedGeneratedEmpty
+        it("handles class with empty class field") {
+            assertGeneratedCode(
+                ClassWithEmptyField::class,
+                setOf(
+                    expectedGeneratedEmpty,
+                    """
+                    interface ClassWithEmptyField {
+                        e: Empty;
+                    }
+                    """,
+                )
             )
-        )
-    }
+        }
 
-    it("handles class with empty class field") {
-        assertGeneratedCode(
-            ClassWithEmptyField::class,
-            setOf(
-                expectedGeneratedEmpty,
-                """
-                interface ClassWithEmptyField {
-                    e: Empty;
-                }
-                """.trimIndent(),
+        it("handles data class with empty class field") {
+            assertGeneratedCode(
+                InterfaceWithEmptyField::class,
+                setOf(
+                    expectedGeneratedEmpty,
+                    """
+                    interface InterfaceWithEmptyField {
+                        e: Empty;
+                    }
+                    """,
+                )
             )
-        )
-    }
+        }
 
-    it("handles data class with empty class field") {
-        assertGeneratedCode(
-            InterfaceWithEmptyField::class,
-            setOf(
-                expectedGeneratedEmpty,
-                """
-                interface InterfaceWithEmptyField {
-                    e: Empty;
-                }
-                """.trimIndent(),
+        it("handles data class with empty class field") {
+            assertGeneratedCode(
+                DataClassWithEmptyField::class,
+                setOf(
+                    expectedGeneratedEmpty,
+                    """
+                    interface DataClassWithEmptyField {
+                        e: Empty;
+                    }
+                    """,
+                )
             )
-        )
-    }
-
-    it("handles data class with empty class field") {
-        assertGeneratedCode(
-            DataClassWithEmptyField::class,
-            setOf(
-                expectedGeneratedEmpty,
-                """
-                interface DataClassWithEmptyField {
-                    e: Empty;
-                }
-                """.trimIndent(),
-            )
-        )
+        }
     }
 
 }) {

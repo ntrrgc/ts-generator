@@ -1,30 +1,32 @@
 package me.ntrrgc.tsGenerator.generator_tests
 
 import me.ntrrgc.tsGenerator.tests.assertGeneratedCode
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.it
+import org.spekframework.spek2.Spek
+import org.spekframework.spek2.style.specification.describe
 
 class TestExtendedClass : Spek({
 
+    describe("test inheritance") {
 
-    it("handles DerivedClass") {
-        assertGeneratedCode(
-            DerivedClass::class,
-            setOf(
-                """
-                interface DerivedClass extends BaseClass {
-                    b: string[];
-                }
-                """,
-                """
-                interface BaseClass {
-                    a: int;
-                }
-                """
+        it("handles DerivedClass") {
+            assertGeneratedCode(
+                DerivedClass::class,
+                setOf(
+                    """
+                    interface DerivedClass extends BaseClass {
+                        b: string[];
+                    }
+                    """,
+                    """
+                    interface BaseClass {
+                        a: int;
+                    }
+                    """
+                )
             )
-        )
-    }
+        }
 
+    }
 
 }) {
     companion object {

@@ -16,11 +16,11 @@
 
 package me.ntrrgc.tsGenerator.tests
 
-import com.winterbe.expekt.should
 import kotlin.reflect.KClass
 import me.ntrrgc.tsGenerator.ClassTransformer
 import me.ntrrgc.tsGenerator.TypeScriptGenerator
 import me.ntrrgc.tsGenerator.VoidType
+import org.junit.jupiter.api.Assertions.assertEquals
 
 fun assertGeneratedCode(
     klass: KClass<*>,
@@ -46,5 +46,5 @@ fun assertGeneratedCode(
         .map(TypeScriptDefinitionFactory::fromCode)
         .toSet()
 
-    actual.should.equal(expected)
+    assertEquals(expected, actual)
 }

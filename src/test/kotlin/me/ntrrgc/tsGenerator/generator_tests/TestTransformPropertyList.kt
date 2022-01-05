@@ -4,33 +4,36 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import me.ntrrgc.tsGenerator.ClassTransformer
 import me.ntrrgc.tsGenerator.tests.assertGeneratedCode
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.it
+import org.spekframework.spek2.Spek
+import org.spekframework.spek2.style.specification.describe
 
 class TestTransformPropertyList : Spek({
+    describe("test property transforming") {
 
-
-    it("supports filtering properties") {
-        assertGeneratedCode(
-            SimpleTypes::class,
-            setOf(
-                """
-                interface SimpleTypes {
-                    aString: string;
-                    aDouble: number;
-                }
-                """
-            ), classTransformers = listOf(
-                object : ClassTransformer {
-                    override fun transformPropertyList(
-                        properties: List<KProperty<*>>,
-                        klass: KClass<*>
-                    ): List<KProperty<*>> {
-                        return properties.filter { it.name != "anInt" }
+        it("supports filtering properties") {
+            assertGeneratedCode(
+                SimpleTypes::class,
+                setOf(
+                    """
+                    interface SimpleTypes {
+                        aString: string;
+                        aDouble: number;
                     }
-                }
+                    """
+                ),
+                classTransformers = listOf(
+                    object : ClassTransformer {
+                        override fun transformPropertyList(
+                            properties: List<KProperty<*>>,
+                            klass: KClass<*>
+                        ): List<KProperty<*>> {
+                            return properties.filter { it.name != "anInt" }
+                        }
+                    }
+                )
             )
-        )
+        }
+
     }
 
 }) {

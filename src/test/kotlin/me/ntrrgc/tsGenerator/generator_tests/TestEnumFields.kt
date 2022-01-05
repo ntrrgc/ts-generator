@@ -1,25 +1,28 @@
 package me.ntrrgc.tsGenerator.generator_tests
 
 import me.ntrrgc.tsGenerator.tests.assertGeneratedCode
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.it
+import org.spekframework.spek2.Spek
+import org.spekframework.spek2.style.specification.describe
 
 class TestEnumFields : Spek({
 
-    it("handles ClassWithEnum") {
-        assertGeneratedCode(
-            ClassWithEnum::class,
-            setOf(
-                """
-                interface ClassWithEnum {
-                    direction: Direction;
-                }
-                """.trimIndent(),
-                """
-                type Direction = "North" | "West" | "South" | "East";
-                """.trimIndent()
+    describe("expect enum fields are converted") {
+
+        it("handles ClassWithEnum") {
+            assertGeneratedCode(
+                ClassWithEnum::class,
+                setOf(
+                    """
+                    interface ClassWithEnum {
+                        direction: Direction;
+                    }
+                    """,
+                    """
+                    type Direction = "North" | "West" | "South" | "East";
+                    """,
+                )
             )
-        )
+        }
     }
 
 }) {
