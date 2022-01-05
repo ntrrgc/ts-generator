@@ -6,7 +6,6 @@ import org.jetbrains.spek.api.dsl.it
 
 class TestCollectionFields : Spek({
 
-
     it("handles ClassWithLists") {
         assertGeneratedCode(
             ClassWithLists::class,
@@ -20,19 +19,48 @@ class TestCollectionFields : Spek({
             )
         )
     }
-
-    it("handles ClassWithArray") {
+    it("handles ClassWithSets") {
         assertGeneratedCode(
-            ClassWithArray::class,
+            ClassWithSets::class,
             setOf(
                 """
-                interface ClassWithArray {
-                    items: string[];
+                interface ClassWithSets {
+                    aSet: string[];
                 }
                 """.trimIndent()
             )
         )
     }
+
+    it("transforms ClassWithMap") {
+        assertGeneratedCode(
+            ClassWithMap::class,
+            setOf(
+                """
+                interface ClassWithMap {
+                    values: { [key: string]: string };
+                }
+                """,
+            )
+        )
+    }
+
+    it("transforms ClassWithEnumMap") {
+        assertGeneratedCode(
+            ClassWithEnumMap::class,
+            setOf(
+                """
+                type Direction = "North" | "West" | "South" | "East";
+                """,
+                """
+                interface ClassWithEnumMap {
+                    values: { [key in Direction]: string };
+                }
+                """,
+            )
+        )
+    }
+
 }) {
     companion object {
 
@@ -41,9 +69,21 @@ class TestCollectionFields : Spek({
             val anArrayList: ArrayList<String>
         )
 
-        class ClassWithArray(
-            val items: Array<String>
+        class ClassWithSets(
+            val aSet: Set<String>,
         )
+
+        class ClassWithMap(val values: Map<String, String>)
+
+        enum class Direction {
+            North,
+            West,
+            South,
+            East
+        }
+
+        class ClassWithEnumMap(val values: Map<Direction, String>)
+
 
     }
 }
