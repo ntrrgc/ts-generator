@@ -1,0 +1,8 @@
+* text eol=lf
+
+*.java text diff=java
+*.kt   text diff=java
+*.kts  text diff=java
+
+# These are explicitly windows files and should use crlf
+*.bat           text eol=crlf
